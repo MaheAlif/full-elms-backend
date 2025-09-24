@@ -135,4 +135,5 @@
 If timeline gets tight, prioritize:
 1. *Essential:* Auth, Student APIs, Basic Chat
 2. *Important:* Teacher APIs, File Upload
-3. *Nice-to-have:* AI Assistant, Advanced Notifications
+3. *Nice-to-have:* AI Assistant, Advanced Notifications 
+done 
