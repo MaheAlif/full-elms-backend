@@ -18,13 +18,16 @@
 - [x] Execute `database_creation.sql` schema
 - [x] Add database error handling
 
-#### 1.3 Middleware Setup ❌
-- [ ] CORS configuration for Next.js frontend
-- [ ] Body parser middleware
-- [ ] File upload middleware (multer)
-- [ ] Rate limiting middleware
-- [ ] Error handling middleware
-- [ ] Request logging middleware
+#### 1.3 Middleware Setup ✅
+- [x] CORS configuration for Next.js frontend
+- [x] Body parser middleware
+- [x] File upload middleware (multer)
+- [x] Rate limiting middleware
+- [x] Error handling middleware
+- [x] Request logging middleware
+- [x] Authentication middleware (JWT)
+- [x] Validation middleware (Joi)
+- [x] Role-based access control middleware
 
 ---
 

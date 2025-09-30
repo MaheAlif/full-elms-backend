@@ -13,6 +13,7 @@ dotenv.config();
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
+import { handleUploadError } from './middleware/upload';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -138,6 +139,9 @@ app.use((req, res) => {
     message: 'Route not found'
   });
 });
+
+// Upload error handler
+app.use(handleUploadError);
 
 // Global error handler
 app.use(errorHandler);
