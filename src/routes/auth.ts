@@ -1,27 +1,25 @@
 import { Router } from 'express';
+import { AuthController } from '../controllers/authController';
+import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { 
+  validateLogin, 
+  validateUpdateProfile,
+  validateIdParam 
+} from '../middleware/validation';
 
 const router = Router();
 
-// Placeholder auth routes - will be implemented in Phase 2
-router.post('/login', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Login endpoint - Implementation coming in Phase 2'
-  });
-});
+// Public routes (no authentication required)
+router.post('/login', validateLogin, AuthController.login);
+router.post('/register', AuthController.register); // In production, make this admin-only
 
-router.post('/logout', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Logout endpoint - Implementation coming in Phase 2'
-  });
-});
+// Protected routes (authentication required)
+router.post('/logout', authenticateToken, AuthController.logout);
+router.get('/session', authenticateToken, AuthController.getSession);
+router.put('/profile', authenticateToken, validateUpdateProfile, AuthController.updateProfile);
+router.put('/change-password', authenticateToken, AuthController.changePassword);
 
-router.get('/session', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Session validation endpoint - Implementation coming in Phase 2'
-  });
-});
+// Admin-only routes
+router.get('/stats', authenticateToken, requireAdmin, AuthController.getStats);
 
 export default router;
