@@ -35,6 +35,11 @@ router.get('/enrollments/:courseId', validateIdParam, AdminController.getCourseE
 router.post('/enrollments', validateEnrollStudent, AdminController.enrollStudent);
 router.delete('/enrollments/:enrollmentId', validateIdParam, AdminController.removeEnrollment);
 
+// ===== DETAILED VIEW ROUTES =====
+router.get('/teachers/:id/profile', validateIdParam, AdminController.getTeacherProfile);
+router.get('/students/:id/profile', validateIdParam, AdminController.getStudentProfile);
+router.get('/courses/:id/details', validateIdParam, AdminController.getCourseDetails);
+
 // ===== SYSTEM STATISTICS ROUTES =====
 router.get('/stats', AdminController.getSystemStats);
 

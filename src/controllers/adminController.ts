@@ -22,16 +22,21 @@ export class AdminController {
       const [courses] = await connection.execute(`
         SELECT 
           c.id,
-          c.title,
+          c.title as course_name,
+          c.course_code,
           c.description,
+          c.credits,
+          c.semester,
+          c.academic_year,
           c.color,
+          c.teacher_id,
           c.created_at,
           u.name as teacher_name,
           u.email as teacher_email,
           COUNT(DISTINCT e.user_id) as student_count
         FROM courses c
         LEFT JOIN users u ON c.teacher_id = u.id AND u.role = 'teacher'
-        LEFT JOIN enrollments e ON c.id = e.section_id
+        LEFT JOIN enrollments e ON c.id = e.course_id
         GROUP BY c.id
         ORDER BY c.created_at DESC
         LIMIT ? OFFSET ?
@@ -87,7 +92,7 @@ export class AdminController {
       
       // Check if course code already exists
       const [existingCourse] = await connection.execute(
-        'SELECT course_id FROM courses WHERE course_code = ?',
+        'SELECT id FROM courses WHERE course_code = ?',
         [course_code]
       );
 
@@ -98,10 +103,11 @@ export class AdminController {
         });
       }
 
+      // Create course without teacher_id (will be assigned later)
       const [result] = await connection.execute(
-        `INSERT INTO courses (course_name, course_code, description, credits, semester, academic_year, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-        [course_name, course_code, description, credits, semester, academic_year]
+        `INSERT INTO courses (title, course_code, description, credits, semester, academic_year, color)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [course_name, course_code, description || '', credits, semester, academic_year, 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20']
       );
 
       const courseId = (result as ResultSetHeader).insertId;
@@ -110,13 +116,15 @@ export class AdminController {
         success: true,
         message: 'Course created successfully',
         data: {
-          course_id: courseId,
+          id: courseId,
           course_name,
           course_code,
-          description,
+          description: description || '',
           credits,
           semester,
-          academic_year
+          academic_year,
+          teacher_id: null,
+          color: 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20'
         }
       });
     } catch (error) {
@@ -148,7 +156,7 @@ export class AdminController {
       
       // Check if course exists
       const [existingCourse] = await connection.execute(
-        'SELECT course_id FROM courses WHERE course_id = ?',
+        'SELECT id FROM courses WHERE id = ?',
         [courseId]
       );
 
@@ -161,7 +169,7 @@ export class AdminController {
 
       // Check if course code is taken by another course
       const [codeCheck] = await connection.execute(
-        'SELECT course_id FROM courses WHERE course_code = ? AND course_id != ?',
+        'SELECT id FROM courses WHERE course_code = ? AND id != ?',
         [course_code, courseId]
       );
 
@@ -174,9 +182,9 @@ export class AdminController {
 
       await connection.execute(
         `UPDATE courses 
-         SET course_name = ?, course_code = ?, description = ?, 
+         SET title = ?, course_code = ?, description = ?, 
              credits = ?, semester = ?, academic_year = ?
-         WHERE course_id = ?`,
+         WHERE id = ?`,
         [course_name, course_code, description, credits, semester, academic_year, courseId]
       );
 
@@ -204,7 +212,7 @@ export class AdminController {
       
       // Check if course exists
       const [existingCourse] = await connection.execute(
-        'SELECT course_id FROM courses WHERE course_id = ?',
+        'SELECT id FROM courses WHERE id = ?',
         [courseId]
       );
 
@@ -215,29 +223,23 @@ export class AdminController {
         });
       }
 
-      // Check if course has enrollments or assignments
+      // Check if course has enrollments
       const [enrollments] = await connection.execute(
         'SELECT COUNT(*) as count FROM enrollments WHERE course_id = ?',
         [courseId]
       );
-      
-      const [assignments] = await connection.execute(
-        'SELECT COUNT(*) as count FROM course_assignments WHERE course_id = ?',
-        [courseId]
-      );
 
       const enrollmentCount = (enrollments as RowDataPacket[])[0].count;
-      const assignmentCount = (assignments as RowDataPacket[])[0].count;
 
-      if (enrollmentCount > 0 || assignmentCount > 0) {
+      if (enrollmentCount > 0) {
         return res.status(400).json({
           success: false,
-          message: 'Cannot delete course with existing enrollments or assignments'
+          message: 'Cannot delete course with existing enrollments'
         });
       }
 
       await connection.execute(
-        'DELETE FROM courses WHERE course_id = ?',
+        'DELETE FROM courses WHERE id = ?',
         [courseId]
       );
 
@@ -287,7 +289,7 @@ export class AdminController {
       // Get users
       const [users] = await connection.execute(`
         SELECT 
-          id as user_id,
+          id,
           name,
           email,
           role,
@@ -339,7 +341,7 @@ export class AdminController {
       
       const [teachers] = await connection.execute(`
         SELECT 
-          u.id as user_id,
+          u.id,
           u.name,
           u.email,
           COUNT(c.id) as course_count
@@ -375,7 +377,7 @@ export class AdminController {
       
       // Verify teacher exists and has teacher role
       const [teacher] = await connection.execute(
-        'SELECT user_id FROM users WHERE user_id = ? AND role = "teacher"',
+        'SELECT id FROM users WHERE id = ? AND role = "teacher"',
         [teacher_id]
       );
 
@@ -388,7 +390,7 @@ export class AdminController {
 
       // Verify course exists
       const [course] = await connection.execute(
-        'SELECT course_id FROM courses WHERE course_id = ?',
+        'SELECT id FROM courses WHERE id = ?',
         [course_id]
       );
 
@@ -399,22 +401,9 @@ export class AdminController {
         });
       }
 
-      // Check if assignment already exists
-      const [existingAssignment] = await connection.execute(
-        'SELECT assignment_id FROM course_assignments WHERE teacher_id = ? AND course_id = ?',
-        [teacher_id, course_id]
-      );
-
-      if ((existingAssignment as RowDataPacket[]).length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'Teacher is already assigned to this course'
-        });
-      }
-
-      // Create assignment
+      // Update course with teacher assignment
       await connection.execute(
-        'INSERT INTO course_assignments (teacher_id, course_id, assigned_at) VALUES (?, ?, NOW())',
+        'UPDATE courses SET teacher_id = ? WHERE id = ?',
         [teacher_id, course_id]
       );
 
@@ -437,21 +426,28 @@ export class AdminController {
    */
   static async removeTeacherAssignment(req: AuthenticatedRequest, res: Response) {
     try {
-      const { teacher_id, course_id } = req.body;
+      const { course_id } = req.body;
       
       const connection = getPool();
       
-      const [result] = await connection.execute(
-        'DELETE FROM course_assignments WHERE teacher_id = ? AND course_id = ?',
-        [teacher_id, course_id]
+      // Verify course exists
+      const [course] = await connection.execute(
+        'SELECT id FROM courses WHERE id = ?',
+        [course_id]
       );
 
-      if ((result as ResultSetHeader).affectedRows === 0) {
+      if ((course as RowDataPacket[]).length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'Teacher assignment not found'
+          message: 'Course not found'
         });
       }
+
+      // Remove teacher assignment (set to NULL)
+      await connection.execute(
+        'UPDATE courses SET teacher_id = NULL WHERE id = ?',
+        [course_id]
+      );
 
       return res.json({
         success: true,
@@ -479,16 +475,15 @@ export class AdminController {
       
       const [enrollments] = await connection.execute(`
         SELECT 
-          e.enrollment_id,
+          e.id as enrollment_id,
           e.enrolled_at,
-          u.user_id,
-          u.first_name,
-          u.last_name,
+          u.id as user_id,
+          u.name,
           u.email
         FROM enrollments e
-        JOIN users u ON e.user_id = u.user_id
+        JOIN users u ON e.user_id = u.id
         WHERE e.course_id = ? AND u.role = 'student'
-        ORDER BY u.first_name, u.last_name
+        ORDER BY u.name
       `, [courseId]);
 
       res.json({
@@ -516,7 +511,7 @@ export class AdminController {
       
       // Verify student exists and has student role
       const [student] = await connection.execute(
-        'SELECT user_id FROM users WHERE user_id = ? AND role = "student"',
+        'SELECT id FROM users WHERE id = ? AND role = "student"',
         [student_id]
       );
 
@@ -529,7 +524,7 @@ export class AdminController {
 
       // Verify course exists
       const [course] = await connection.execute(
-        'SELECT course_id FROM courses WHERE course_id = ?',
+        'SELECT id FROM courses WHERE id = ?',
         [course_id]
       );
 
@@ -542,7 +537,7 @@ export class AdminController {
 
       // Check if enrollment already exists
       const [existingEnrollment] = await connection.execute(
-        'SELECT enrollment_id FROM enrollments WHERE user_id = ? AND course_id = ?',
+        'SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?',
         [student_id, course_id]
       );
 
@@ -583,7 +578,7 @@ export class AdminController {
       const connection = getPool();
       
       const [result] = await connection.execute(
-        'DELETE FROM enrollments WHERE enrollment_id = ?',
+        'DELETE FROM enrollments WHERE id = ?',
         [enrollmentId]
       );
 
@@ -608,6 +603,196 @@ export class AdminController {
   }
 
   // ===== SYSTEM STATISTICS =====
+
+  // ===== DETAILED VIEWS =====
+
+  /**
+   * Get teacher profile with assigned courses
+   * GET /api/admin/teachers/:id/profile
+   */
+  static async getTeacherProfile(req: AuthenticatedRequest, res: Response) {
+    try {
+      const teacherId = req.params.id;
+      const connection = getPool();
+      
+      // Get teacher details
+      const [teacher] = await connection.execute(`
+        SELECT 
+          id,
+          name,
+          email,
+          created_at
+        FROM users 
+        WHERE id = ? AND role = 'teacher'
+      `, [teacherId]);
+
+      if ((teacher as RowDataPacket[]).length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Teacher not found'
+        });
+      }
+
+      // Get assigned courses
+      const [courses] = await connection.execute(`
+        SELECT 
+          c.id,
+          c.title as course_name,
+          c.course_code,
+          c.description,
+          c.credits,
+          c.semester,
+          c.academic_year,
+          COUNT(DISTINCT e.user_id) as student_count
+        FROM courses c
+        LEFT JOIN enrollments e ON c.id = e.course_id
+        WHERE c.teacher_id = ?
+        GROUP BY c.id
+        ORDER BY c.created_at DESC
+      `, [teacherId]);
+
+      return res.json({
+        success: true,
+        data: {
+          teacher: (teacher as RowDataPacket[])[0],
+          courses: courses
+        }
+      });
+    } catch (error) {
+      console.error('Get teacher profile error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve teacher profile'
+      });
+    }
+  }
+
+  /**
+   * Get student profile with enrolled courses
+   * GET /api/admin/students/:id/profile
+   */
+  static async getStudentProfile(req: AuthenticatedRequest, res: Response) {
+    try {
+      const studentId = req.params.id;
+      const connection = getPool();
+      
+      // Get student details
+      const [student] = await connection.execute(`
+        SELECT 
+          id,
+          name,
+          email,
+          created_at
+        FROM users 
+        WHERE id = ? AND role = 'student'
+      `, [studentId]);
+
+      if ((student as RowDataPacket[]).length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Student not found'
+        });
+      }
+
+      // Get enrolled courses
+      const [courses] = await connection.execute(`
+        SELECT 
+          c.id,
+          c.title as course_name,
+          c.course_code,
+          c.description,
+          c.credits,
+          c.semester,
+          c.academic_year,
+          u.name as teacher_name,
+          e.enrolled_at
+        FROM enrollments e
+        JOIN courses c ON e.course_id = c.id
+        LEFT JOIN users u ON c.teacher_id = u.id
+        WHERE e.user_id = ?
+        ORDER BY e.enrolled_at DESC
+      `, [studentId]);
+
+      return res.json({
+        success: true,
+        data: {
+          student: (student as RowDataPacket[])[0],
+          courses: courses
+        }
+      });
+    } catch (error) {
+      console.error('Get student profile error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve student profile'
+      });
+    }
+  }
+
+  /**
+   * Get course details with enrolled students
+   * GET /api/admin/courses/:id/details
+   */
+  static async getCourseDetails(req: AuthenticatedRequest, res: Response) {
+    try {
+      const courseId = req.params.id;
+      const connection = getPool();
+      
+      // Get course details
+      const [course] = await connection.execute(`
+        SELECT 
+          c.id,
+          c.title as course_name,
+          c.course_code,
+          c.description,
+          c.credits,
+          c.semester,
+          c.academic_year,
+          c.color,
+          c.created_at,
+          u.name as teacher_name,
+          u.email as teacher_email
+        FROM courses c
+        LEFT JOIN users u ON c.teacher_id = u.id
+        WHERE c.id = ?
+      `, [courseId]);
+
+      if ((course as RowDataPacket[]).length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Course not found'
+        });
+      }
+
+      // Get enrolled students
+      const [students] = await connection.execute(`
+        SELECT 
+          u.id,
+          u.name,
+          u.email,
+          e.enrolled_at,
+          e.id as enrollment_id
+        FROM enrollments e
+        JOIN users u ON e.user_id = u.id
+        WHERE e.course_id = ? AND u.role = 'student'
+        ORDER BY u.name
+      `, [courseId]);
+
+      return res.json({
+        success: true,
+        data: {
+          course: (course as RowDataPacket[])[0],
+          students: students
+        }
+      });
+    } catch (error) {
+      console.error('Get course details error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve course details'
+      });
+    }
+  }
 
   /**
    * Get system statistics
