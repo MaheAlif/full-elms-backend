@@ -52,6 +52,36 @@ export const schemas = {
     color: Joi.string().max(50)
   }),
 
+  // Admin course validation schemas
+  adminCreateCourse: Joi.object({
+    course_name: Joi.string().min(3).max(200).required(),
+    course_code: Joi.string().min(2).max(20).required(),
+    description: Joi.string().max(1000).allow(''),
+    credits: Joi.number().integer().min(1).max(10).required(),
+    semester: Joi.string().valid('Fall', 'Spring', 'Summer').required(),
+    academic_year: Joi.string().pattern(/^\d{4}-\d{4}$/).required()
+  }),
+
+  adminUpdateCourse: Joi.object({
+    course_name: Joi.string().min(3).max(200),
+    course_code: Joi.string().min(2).max(20),
+    description: Joi.string().max(1000).allow(''),
+    credits: Joi.number().integer().min(1).max(10),
+    semester: Joi.string().valid('Fall', 'Spring', 'Summer'),
+    academic_year: Joi.string().pattern(/^\d{4}-\d{4}$/)
+  }),
+
+  // Admin user management validation
+  assignTeacher: Joi.object({
+    teacher_id: Joi.number().integer().positive().required(),
+    course_id: Joi.number().integer().positive().required()
+  }),
+
+  enrollStudent: Joi.object({
+    student_id: Joi.number().integer().positive().required(),
+    course_id: Joi.number().integer().positive().required()
+  }),
+
   // Section validation schemas
   createSection: Joi.object({
     course_id: Joi.number().integer().positive().required(),
@@ -151,3 +181,9 @@ export const validateAiQuery = validate(schemas.aiQuery);
 export const validateCreateNotification = validate(schemas.createNotification);
 export const validateIdParam = validate(schemas.idParam, 'params');
 export const validatePagination = validate(schemas.pagination, 'query');
+
+// Admin validation middleware
+export const validateAdminCreateCourse = validate(schemas.adminCreateCourse);
+export const validateAdminUpdateCourse = validate(schemas.adminUpdateCourse);
+export const validateAssignTeacher = validate(schemas.assignTeacher);
+export const validateEnrollStudent = validate(schemas.enrollStudent);

@@ -1,6 +1,9 @@
 # Frontend (Next.js project folder)
 elms-uiu/
 
+# Test output files (keep test scripts, ignore test outputs)
+tests/*.log
+tests/test-output.json
 # Dependencies
 node_modules/
 npm-debug.log*

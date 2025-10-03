@@ -1,41 +1,41 @@
 import { Router } from 'express';
+import { AdminController } from '../controllers/adminController';
+import { authenticateToken, requireAdmin } from '../middleware/auth';
+import {
+  validateAdminCreateCourse,
+  validateAdminUpdateCourse,
+  validateAssignTeacher,
+  validateEnrollStudent,
+  validateIdParam,
+  validatePagination
+} from '../middleware/validation';
 
 const router = Router();
 
-// Placeholder admin routes - will be implemented in Phase 6
-router.get('/courses', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Admin courses endpoint - Implementation coming in Phase 6'
-  });
-});
+// Apply authentication and admin role check to all admin routes
+router.use(authenticateToken);
+router.use(requireAdmin);
 
-router.post('/courses', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Admin create course endpoint - Implementation coming in Phase 6'
-  });
-});
+// ===== COURSE MANAGEMENT ROUTES =====
+router.get('/courses', validatePagination, AdminController.getCourses);
+router.post('/courses', validateAdminCreateCourse, AdminController.createCourse);
+router.put('/courses/:id', validateIdParam, validateAdminUpdateCourse, AdminController.updateCourse);
+router.delete('/courses/:id', validateIdParam, AdminController.deleteCourse);
 
-router.get('/teachers', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Admin teachers endpoint - Implementation coming in Phase 6'
-  });
-});
+// ===== USER MANAGEMENT ROUTES =====
+router.get('/users', AdminController.getUsers);
+router.get('/teachers', AdminController.getTeachers);
 
-router.get('/students', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Admin students endpoint - Implementation coming in Phase 6'
-  });
-});
+// ===== TEACHER-COURSE ASSIGNMENT ROUTES =====
+router.post('/assign-teacher', validateAssignTeacher, AdminController.assignTeacher);
+router.delete('/assign-teacher', validateAssignTeacher, AdminController.removeTeacherAssignment);
 
-router.post('/enrollments', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Admin enrollments endpoint - Implementation coming in Phase 6'
-  });
-});
+// ===== ENROLLMENT MANAGEMENT ROUTES =====
+router.get('/enrollments/:courseId', validateIdParam, AdminController.getCourseEnrollments);
+router.post('/enrollments', validateEnrollStudent, AdminController.enrollStudent);
+router.delete('/enrollments/:enrollmentId', validateIdParam, AdminController.removeEnrollment);
+
+// ===== SYSTEM STATISTICS ROUTES =====
+router.get('/stats', AdminController.getSystemStats);
 
 export default router;
