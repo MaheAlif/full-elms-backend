@@ -435,9 +435,9 @@ export class TeacherController {
 
       // Create assignment
       const [result] = await connection.execute(`
-        INSERT INTO assignments (section_id, title, description, due_date, total_marks, created_by, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
-      `, [section_id, title, description, due_date, total_marks, teacherId]);
+        INSERT INTO assignments (section_id, title, description, due_date, total_marks)
+        VALUES (?, ?, ?, ?, ?)
+      `, [section_id, title, description, due_date, total_marks]);
 
       const assignmentId = (result as ResultSetHeader).insertId;
 
