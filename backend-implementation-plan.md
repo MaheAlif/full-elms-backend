@@ -107,42 +107,46 @@
 
 ### Phase 4: Teacher Dashboard APIs ❌
 
-#### 4.1 Teacher Course Management ❌
-- [ ] Get assigned courses (`GET /api/teacher/courses`)
-- [ ] Get section students (`GET /api/teacher/students`)
-- [ ] Get section materials (`GET /api/teacher/materials`)
-- [ ] Class roster management
+#### 4.1 Teacher Course Management ✅
+- [x] Get assigned courses (`GET /api/teacher/courses`)
+- [x] Get section students (`GET /api/teacher/students`) 
+- [x] Get section materials (`GET /api/teacher/materials`)
 
-#### 4.2 Material Upload System ❌
-- [ ] Upload material endpoint (`POST /api/teacher/materials/upload`)
-- [ ] Material CRUD operations
-- [ ] File validation and processing
-- [ ] Storage management (local/cloud)
-- [ ] Material categorization and tagging
+#### 4.2 Material Upload System ✅
+- [x] Upload material endpoint (`POST /api/teacher/materials/upload`)
+- [x] Material CRUD operations
+- [x] File validation and processing
+- [x] Storage management (local)
 
-#### 4.3 Assignment & Assessment Management ❌
-- [ ] Create assignment (`POST /api/teacher/assignments`)
-- [ ] Get assignments (`GET /api/teacher/assignments`)
-- [ ] Grade submissions (`PUT /api/teacher/submissions/:id/grade`)
-- [ ] Assignment analytics and reporting
+#### 4.3 Assignment & Assessment Management ✅
+- [x] Create assignment (`POST /api/teacher/assignments`)
+- [x] Get assignments (`GET /api/teacher/assignments`)
+- [ ] Grade submissions (`PUT /api/teacher/submissions/:id/grade`) - Future
 
 ---
 
-### Phase 5: Student APIs ❌
+### Phase 5: Student Dashboard & Interactive Features
 
-#### 5.1 Student Dashboard ❌
-- [ ] Get enrolled courses (`GET /api/student/courses`)
-- [ ] Get course materials (`GET /api/student/materials`)
-- [ ] Get calendar events (`GET /api/student/calendar`)
+#### 5.1 Student Dashboard ✅ (Partially exists, needs enhancement)
+- [x] Get enrolled courses (`GET /api/student/courses`) - Already implemented
+- [x] Get course materials (`GET /api/student/materials`) - Already implemented  
+- [ ] Enhanced calendar events (`GET /api/student/calendar`)
+- [ ] Assignment deadlines integration
 - [ ] Get student profile (`GET /api/student/profile`)
 
-#### 5.2 File & Content Access ❌
-- [ ] File download endpoint (`GET /api/files/download/:id`)
-- [ ] File security and access control
-- [ ] File type validation
-- [ ] Content progress tracking
+#### 5.2 Calendar & Deadline System 🆕
+- [ ] Assignment deadline calendar (`GET /api/student/assignments/calendar`)
+- [ ] Course calendar events (`GET /api/student/calendar/events`)
+- [ ] Deadline notifications API (`GET /api/student/notifications`)
+- [ ] Calendar event creation from assignments (automatic)
 
-#### 5.3 Assignment Submission ❌
+#### 5.3 AI Learning Assistant 🆕  
+- [ ] AI chat endpoint (`POST /api/student/ai/chat`)
+- [ ] Course-context AI (`GET /api/student/ai/context/:courseId`)
+- [ ] Assignment help AI (`POST /api/student/ai/assignment-help`)
+- [ ] AI conversation history (`GET /api/student/ai/history`)
+
+#### 5.4 Assignment Submission (Future Phase)
 - [ ] Submit assignment (`POST /api/student/assignments/:id/submit`)
 - [ ] Get assignment details (`GET /api/student/assignments`)
 - [ ] View grades and feedback

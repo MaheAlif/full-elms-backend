@@ -117,6 +117,12 @@ export const schemas = {
     total_marks: Joi.number().integer().positive()
   }),
 
+  // Submission validation schemas
+  submitAssignment: Joi.object({
+    title: Joi.string().min(3).max(255),
+    description: Joi.string().max(1000)
+  }),
+
   // Material validation schemas
   createMaterial: Joi.object({
     section_id: Joi.number().integer().positive().required(),
@@ -190,6 +196,7 @@ export const validateSendMessage = validate(schemas.sendMessage);
 export const validateCreateEnrollment = validate(schemas.createEnrollment);
 export const validateCreateCalendarEvent = validate(schemas.createCalendarEvent);
 export const validateGradeSubmission = validate(schemas.gradeSubmission);
+export const validateSubmissionUpload = validate(schemas.submitAssignment);
 export const validateAiQuery = validate(schemas.aiQuery);
 export const validateCreateNotification = validate(schemas.createNotification);
 export const validateIdParam = validate(schemas.idParam, 'params');

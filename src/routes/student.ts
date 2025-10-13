@@ -1,40 +1,49 @@
 import { Router } from 'express';
+import { StudentController } from '../controllers/studentController';
+import { authenticateToken, requireStudent } from '../middleware/auth';
+import { uploadSubmission } from '../middleware/upload';
+import {
+  validateIdParam,
+  validateSubmissionUpload
+} from '../middleware/validation';
 
 const router = Router();
 
-// Placeholder student routes - will be implemented in Phase 3
-router.get('/courses', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Student courses endpoint - Implementation coming in Phase 3'
-  });
-});
+// Apply authentication and student role check to all student routes
+router.use(authenticateToken);
+router.use(requireStudent);
 
-router.get('/materials', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Student materials endpoint - Implementation coming in Phase 3'
-  });
-});
+// ===== COURSE MANAGEMENT ROUTES =====
+router.get('/courses', StudentController.getCourses);
+router.get('/courses/:id/details', validateIdParam, StudentController.getCourseDetails);
 
-router.get('/calendar', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Student calendar endpoint - Implementation coming in Phase 3'
-  });
-});
+// ===== MATERIAL ACCESS ROUTES =====
+router.get('/materials', StudentController.getMaterials);
+router.get('/materials/:id/download', validateIdParam, StudentController.downloadMaterial);
 
+// ===== ASSIGNMENT ROUTES =====
+router.get('/assignments', StudentController.getAssignments);
+router.get('/assignments/:id', validateIdParam, StudentController.getAssignmentDetails);
+router.post('/assignments/:id/submit', validateIdParam, uploadSubmission, validateSubmissionUpload, StudentController.submitAssignment);
+
+// ===== CALENDAR ROUTES =====
+router.get('/calendar', StudentController.getCalendar);
+
+// ===== PROFILE ROUTES =====
+router.get('/profile', StudentController.getProfile);
+
+// ===== CHAT ROUTES (Placeholder for future implementation) =====
 router.get('/chat', (req, res) => {
   res.status(501).json({
     success: false,
-    message: 'Student chat endpoint - Implementation coming in Phase 4'
+    message: 'Student chat endpoint - Implementation coming in Phase 6'
   });
 });
 
 router.post('/chat/send', (req, res) => {
   res.status(501).json({
     success: false,
-    message: 'Student chat send endpoint - Implementation coming in Phase 4'
+    message: 'Student chat send endpoint - Implementation coming in Phase 6'
   });
 });
 
