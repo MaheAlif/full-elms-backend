@@ -64,9 +64,6 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
 // Request logging
 app.use(requestLogger);
 
@@ -79,6 +76,16 @@ app.get('/health', (req, res) => {
     uptime: process.uptime()
   });
 });
+
+// Serve static files (uploads) - Single declaration
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders: (res, path) => {
+    // Set proper headers for file downloads
+    if (path.endsWith('.pdf')) {
+      res.setHeader('Content-Type', 'application/pdf');
+    }
+  }
+}));
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -135,16 +142,16 @@ io.on('connection', (socket) => {
   });
 });
 
-// 404 handler
+// Upload error handler
+app.use(handleUploadError);
+
+// 404 handler - must come after all routes but before global error handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'Route not found'
   });
 });
-
-// Upload error handler
-app.use(handleUploadError);
 
 // Global error handler
 app.use(errorHandler);
