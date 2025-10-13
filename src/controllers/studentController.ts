@@ -205,8 +205,8 @@ export class StudentController {
           s.file_path as submission_file,
           s.submitted_at,
           s.grade,
-          NULL as feedback,
-          NULL as graded_at,
+          s.feedback,
+          s.graded_at,
           CASE 
             WHEN s.id IS NOT NULL THEN 'submitted'
             WHEN a.due_date < NOW() THEN 'overdue'

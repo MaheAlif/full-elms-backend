@@ -153,7 +153,8 @@ export const schemas = {
 
   // Submission grading validation
   gradeSubmission: Joi.object({
-    grade: Joi.number().integer().min(0).max(100).required()
+    grade: Joi.number().min(0).max(1000).required(),
+    feedback: Joi.string().max(2000).allow('').optional()
   }),
 
   // AI interaction validation

@@ -43,7 +43,8 @@ app.use(helmet());
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || "http://localhost:3000",
-    "http://localhost:3001" // Allow alternate port
+    "http://localhost:3001", // Allow alternate port
+    "http://localhost:3002"  // Allow new frontend port
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

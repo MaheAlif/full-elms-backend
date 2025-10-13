@@ -562,47 +562,85 @@ export class TeacherController {
       const teacherId = req.user!.userId;
       const connection = getPool();
       
-      // Verify teacher owns the assignment
-      const [ownershipCheck] = await connection.execute(`
-        SELECT a.id, a.title, a.total_marks
+      // Verify teacher owns the assignment and get assignment details
+      const [assignmentCheck] = await connection.execute(`
+        SELECT 
+          a.id, 
+          a.title, 
+          a.description,
+          a.due_date,
+          a.total_marks,
+          c.id as course_id,
+          c.title as course_name,
+          c.course_code,
+          s.name as section_name
         FROM assignments a
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
         WHERE a.id = ? AND c.teacher_id = ?
       `, [assignmentId, teacherId]);
 
-      if ((ownershipCheck as RowDataPacket[]).length === 0) {
+      if ((assignmentCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
           success: false,
           message: 'Access denied: Assignment not in your course'
         });
       }
 
-      // Get submissions
-      const [submissions] = await connection.execute(`
+      const assignment = (assignmentCheck as RowDataPacket[])[0];
+
+      // Get all enrolled students and their submission status
+      const [studentsWithSubmissions] = await connection.execute(`
         SELECT 
-          s.id,
-          s.file_path,
-          s.submitted_at,
-          s.grade,
-          s.feedback,
-          s.graded_at,
           u.id as student_id,
           u.name as student_name,
-          u.email as student_email
-        FROM submissions s
-        JOIN users u ON s.user_id = u.id
-        WHERE s.assignment_id = ?
-        ORDER BY s.submitted_at DESC
-      `, [assignmentId]);
+          u.email as student_email,
+          sub.id as submission_id,
+          sub.file_path,
+          sub.submitted_at,
+          sub.grade,
+          sub.feedback,
+          sub.graded_at,
+          CASE 
+            WHEN sub.id IS NOT NULL THEN 'submitted'
+            WHEN ? < NOW() THEN 'overdue'
+            ELSE 'pending'
+          END as status,
+          CASE 
+            WHEN sub.id IS NOT NULL AND sub.submitted_at > ? THEN 
+              CEIL(TIMESTAMPDIFF(HOUR, ?, sub.submitted_at) / 24)
+            ELSE 0
+          END as days_late
+        FROM enrollments e
+        JOIN users u ON e.user_id = u.id
+        JOIN sections s ON e.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        JOIN assignments a ON s.id = a.section_id
+        LEFT JOIN submissions sub ON a.id = sub.assignment_id AND u.id = sub.student_id
+        WHERE a.id = ? AND u.role = 'student'
+        ORDER BY u.name ASC
+      `, [assignment.due_date, assignment.due_date, assignment.due_date, assignmentId]);
 
-      const assignment = (ownershipCheck as RowDataPacket[])[0];
+      // Calculate submission statistics
+      const totalStudents = (studentsWithSubmissions as RowDataPacket[]).length;
+      const submittedCount = (studentsWithSubmissions as RowDataPacket[]).filter(s => s.submission_id).length;
+      const gradedCount = (studentsWithSubmissions as RowDataPacket[]).filter(s => s.grade !== null).length;
+      const overdueCount = (studentsWithSubmissions as RowDataPacket[]).filter(s => s.status === 'overdue').length;
 
       return res.json({
         success: true,
         data: {
-          assignment,
-          submissions
+          assignment: {
+            ...assignment,
+            statistics: {
+              total_students: totalStudents,
+              submitted_count: submittedCount,
+              graded_count: gradedCount,
+              overdue_count: overdueCount,
+              pending_count: totalStudents - submittedCount
+            }
+          },
+          students: studentsWithSubmissions
         }
       });
     } catch (error) {
@@ -610,6 +648,87 @@ export class TeacherController {
       return res.status(500).json({
         success: false,
         message: 'Failed to retrieve submissions'
+      });
+    }
+  }
+
+  /**
+   * Download student submission file
+   * GET /api/teacher/submissions/:id/download
+   */
+  static async downloadSubmission(req: AuthenticatedRequest, res: Response) {
+    try {
+      const submissionId = req.params.id;
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      // Verify teacher owns the assignment and get file details
+      const [submissionCheck] = await connection.execute(`
+        SELECT 
+          sub.id,
+          sub.file_path,
+          sub.submitted_at,
+          u.name as student_name,
+          a.title as assignment_title
+        FROM submissions sub
+        JOIN users u ON sub.student_id = u.id
+        JOIN assignments a ON sub.assignment_id = a.id
+        JOIN sections s ON a.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        WHERE sub.id = ? AND c.teacher_id = ?
+      `, [submissionId, teacherId]);
+
+      if ((submissionCheck as RowDataPacket[]).length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: Submission not in your course'
+        });
+      }
+
+      const submission = (submissionCheck as RowDataPacket[])[0];
+      const filePath = submission.file_path;
+
+      // Check if file exists
+      const fs = require('fs');
+      const path = require('path');
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Submission file not found'
+        });
+      }
+
+      // Set appropriate headers for file download
+      const fileName = path.basename(filePath);
+      const fileExtension = path.extname(fileName);
+      const downloadName = `${submission.student_name}_${submission.assignment_title}${fileExtension}`;
+
+      res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
+      res.setHeader('Content-Type', 'application/octet-stream');
+
+      // Stream the file
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+
+      fileStream.on('error', (error: any) => {
+        console.error('File download error:', error);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            message: 'Error downloading file'
+          });
+        }
+      });
+
+      // Return after setting up the stream
+      return;
+
+    } catch (error) {
+      console.error('Download submission error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to download submission'
       });
     }
   }
@@ -642,7 +761,7 @@ export class TeacherController {
         });
       }
 
-      // Update grade
+      // Update grade with feedback and timestamp
       await connection.execute(`
         UPDATE submissions 
         SET grade = ?, feedback = ?, graded_at = NOW(), graded_by = ?

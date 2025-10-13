@@ -41,6 +41,7 @@ router.delete('/assignments/:id', validateIdParam, TeacherController.deleteAssig
 
 // ===== GRADING ROUTES =====
 router.get('/assignments/:id/submissions', validateIdParam, TeacherController.getAssignmentSubmissions);
+router.get('/submissions/:id/download', validateIdParam, TeacherController.downloadSubmission);
 router.put('/submissions/:id/grade', validateIdParam, validateGradeSubmission, TeacherController.gradeSubmission);
 
 export default router;
