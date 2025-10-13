@@ -794,6 +794,118 @@ export class AdminController {
     }
   }
 
+  // ===== USER CREATION =====
+
+  /**
+   * Create a new teacher account
+   * POST /api/admin/teachers
+   */
+  static async createTeacher(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { name, email, password } = req.body;
+      const connection = getPool();
+      
+      // Check if email already exists
+      const [existingUser] = await connection.execute(
+        'SELECT id FROM users WHERE email = ?',
+        [email]
+      );
+
+      if ((existingUser as RowDataPacket[]).length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already exists in the system'
+        });
+      }
+
+      // Hash the password
+      const bcrypt = require('bcryptjs');
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create teacher account
+      const [result] = await connection.execute(
+        `INSERT INTO users (name, email, password_hash, role, created_at)
+         VALUES (?, ?, ?, 'teacher', NOW())`,
+        [name, email, hashedPassword]
+      );
+
+      const teacherId = (result as ResultSetHeader).insertId;
+
+      return res.status(201).json({
+        success: true,
+        message: 'Teacher account created successfully',
+        data: {
+          id: teacherId,
+          name,
+          email,
+          role: 'teacher'
+        }
+      });
+    } catch (error) {
+      console.error('Create teacher error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create teacher account'
+      });
+    }
+  }
+
+  /**
+   * Create a new student account
+   * POST /api/admin/students
+   */
+  static async createStudent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { name, email, password } = req.body;
+      const connection = getPool();
+      
+      // Check if email already exists
+      const [existingUser] = await connection.execute(
+        'SELECT id FROM users WHERE email = ?',
+        [email]
+      );
+
+      if ((existingUser as RowDataPacket[]).length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already exists in the system'
+        });
+      }
+
+      // Hash the password
+      const bcrypt = require('bcryptjs');
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create student account
+      const [result] = await connection.execute(
+        `INSERT INTO users (name, email, password_hash, role, created_at)
+         VALUES (?, ?, ?, 'student', NOW())`,
+        [name, email, hashedPassword]
+      );
+
+      const studentId = (result as ResultSetHeader).insertId;
+
+      return res.status(201).json({
+        success: true,
+        message: 'Student account created successfully',
+        data: {
+          id: studentId,
+          name,
+          email,
+          role: 'student'
+        }
+      });
+    } catch (error) {
+      console.error('Create student error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create student account'
+      });
+    }
+  }
+
   /**
    * Get system statistics
    * GET /api/admin/stats

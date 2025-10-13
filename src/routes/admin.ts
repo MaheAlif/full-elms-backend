@@ -4,6 +4,8 @@ import { authenticateToken, requireAdmin } from '../middleware/auth';
 import {
   validateAdminCreateCourse,
   validateAdminUpdateCourse,
+  validateCreateTeacher,
+  validateCreateStudent,
   validateAssignTeacher,
   validateEnrollStudent,
   validateIdParam,
@@ -25,6 +27,8 @@ router.delete('/courses/:id', validateIdParam, AdminController.deleteCourse);
 // ===== USER MANAGEMENT ROUTES =====
 router.get('/users', AdminController.getUsers);
 router.get('/teachers', AdminController.getTeachers);
+router.post('/teachers', validateCreateTeacher, AdminController.createTeacher);
+router.post('/students', validateCreateStudent, AdminController.createStudent);
 
 // ===== TEACHER-COURSE ASSIGNMENT ROUTES =====
 router.post('/assign-teacher', validateAssignTeacher, AdminController.assignTeacher);

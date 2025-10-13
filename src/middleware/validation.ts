@@ -71,6 +71,19 @@ export const schemas = {
     academic_year: Joi.string().pattern(/^\d{4}-\d{4}$/)
   }),
 
+  // User creation schemas
+  createTeacher: Joi.object({
+    name: Joi.string().min(2).max(100).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+  }),
+
+  createStudent: Joi.object({
+    name: Joi.string().min(2).max(100).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required()
+  }),
+
   // Admin user management validation
   assignTeacher: Joi.object({
     teacher_id: Joi.number().integer().positive().required(),
@@ -185,5 +198,7 @@ export const validatePagination = validate(schemas.pagination, 'query');
 // Admin validation middleware
 export const validateAdminCreateCourse = validate(schemas.adminCreateCourse);
 export const validateAdminUpdateCourse = validate(schemas.adminUpdateCourse);
+export const validateCreateTeacher = validate(schemas.createTeacher);
+export const validateCreateStudent = validate(schemas.createStudent);
 export const validateAssignTeacher = validate(schemas.assignTeacher);
 export const validateEnrollStudent = validate(schemas.enrollStudent);
