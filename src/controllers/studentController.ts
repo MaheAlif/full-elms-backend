@@ -36,13 +36,13 @@ export class StudentController {
           COUNT(DISTINCT a.id) as assignment_count,
           COUNT(DISTINCT s.id) as submission_count
         FROM enrollments e
-        JOIN courses c ON e.course_id = c.id
+        LEFT JOIN sections sec ON e.section_id = sec.id
+        LEFT JOIN courses c ON (sec.course_id = c.id OR e.course_id = c.id)
         LEFT JOIN users u ON c.teacher_id = u.id
-        LEFT JOIN sections sec ON c.id = sec.course_id
         LEFT JOIN materials m ON sec.id = m.section_id
         LEFT JOIN assignments a ON sec.id = a.section_id
         LEFT JOIN submissions s ON a.id = s.assignment_id AND e.user_id = s.student_id
-        WHERE e.user_id = ?
+        WHERE e.user_id = ? AND c.id IS NOT NULL
         GROUP BY c.id, u.id
         ORDER BY c.created_at DESC
       `, [studentId]);
@@ -135,7 +135,7 @@ export class StudentController {
       const connection = getPool();
       
       let query = `
-        SELECT 
+        SELECT DISTINCT
           m.id,
           m.title,
           m.type,
@@ -147,11 +147,11 @@ export class StudentController {
           c.id as course_id,
           u.name as uploaded_by
         FROM materials m
-        JOIN sections s ON m.section_id = s.id
-        JOIN courses c ON s.course_id = c.id
-        JOIN enrollments e ON c.id = e.course_id
+        LEFT JOIN sections s ON m.section_id = s.id
+        LEFT JOIN courses c ON s.course_id = c.id
+        JOIN enrollments e ON (s.id = e.section_id OR c.id = e.course_id)
         LEFT JOIN users u ON c.teacher_id = u.id
-        WHERE e.user_id = ?
+        WHERE e.user_id = ? AND c.id IS NOT NULL
       `;
       
       const params: any[] = [studentId];
@@ -191,7 +191,7 @@ export class StudentController {
       const connection = getPool();
       
       let query = `
-        SELECT 
+        SELECT DISTINCT
           a.id,
           a.title,
           a.description,
@@ -214,11 +214,11 @@ export class StudentController {
           END as status,
           DATEDIFF(a.due_date, NOW()) as days_remaining
         FROM assignments a
-        JOIN sections sec ON a.section_id = sec.id
-        JOIN courses c ON sec.course_id = c.id
-        JOIN enrollments e ON c.id = e.course_id
+        LEFT JOIN sections sec ON a.section_id = sec.id
+        LEFT JOIN courses c ON sec.course_id = c.id
+        JOIN enrollments e ON (sec.id = e.section_id OR c.id = e.course_id)
         LEFT JOIN submissions s ON a.id = s.assignment_id AND e.user_id = s.student_id
-        WHERE e.user_id = ?
+        WHERE e.user_id = ? AND c.id IS NOT NULL
       `;
       
       const params: any[] = [studentId];
@@ -267,7 +267,7 @@ export class StudentController {
         FROM assignments a
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        JOIN enrollments e ON c.id = e.course_id
+        JOIN enrollments e ON (s.id = e.section_id OR c.id = e.course_id)
         WHERE a.id = ? AND e.user_id = ?
       `, [assignmentId, studentId]);
 
@@ -443,11 +443,11 @@ export class StudentController {
             ELSE 'pending'
           END as status
         FROM assignments a
-        JOIN sections sec ON a.section_id = sec.id
-        JOIN courses c ON sec.course_id = c.id
-        JOIN enrollments e ON c.id = e.course_id
+        LEFT JOIN sections sec ON a.section_id = sec.id
+        LEFT JOIN courses c ON sec.course_id = c.id
+        JOIN enrollments e ON (sec.id = e.section_id OR c.id = e.course_id)
         LEFT JOIN submissions s ON a.id = s.assignment_id AND e.user_id = s.student_id
-        WHERE e.user_id = ?
+        WHERE e.user_id = ? AND c.id IS NOT NULL
         
         UNION ALL
         
@@ -462,10 +462,29 @@ export class StudentController {
           c.color as course_color,
           ce.type as status
         FROM calendar_events ce
-        JOIN sections sec ON ce.section_id = sec.id
-        JOIN courses c ON sec.course_id = c.id
-        JOIN enrollments e ON c.id = e.course_id
-        WHERE e.user_id = ?
+        LEFT JOIN sections sec ON ce.section_id = sec.id
+        LEFT JOIN courses c ON sec.course_id = c.id
+        JOIN enrollments e ON (sec.id = e.section_id OR c.id = e.course_id)
+        WHERE e.user_id = ? AND c.id IS NOT NULL
+        
+        UNION ALL
+        
+        SELECT 
+          'university_event' as type,
+          ue.id,
+          ue.title,
+          ue.description,
+          ue.date,
+          'University-wide' as course_name,
+          'ALL' as course_code,
+          CASE ue.priority 
+            WHEN 'high' THEN '#dc2626'
+            WHEN 'normal' THEN '#9333ea'
+            ELSE '#6b7280'
+          END as course_color,
+          ue.type as status
+        FROM university_events ue
+        WHERE ue.date >= CURDATE() - INTERVAL 30 DAY
         
         ORDER BY date ASC
       `, [studentId, studentId]);
@@ -506,7 +525,7 @@ export class StudentController {
         FROM materials m
         JOIN sections s ON m.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        JOIN enrollments e ON c.id = e.course_id
+        JOIN enrollments e ON (s.id = e.section_id OR c.id = e.course_id)
         WHERE m.id = ? AND e.user_id = ?
       `, [materialId, studentId]);
 
@@ -635,6 +654,117 @@ export class StudentController {
       return res.status(500).json({
         success: false,
         message: 'Failed to retrieve profile'
+      });
+    }
+  }
+
+  // ===== NOTIFICATIONS MANAGEMENT =====
+
+  /**
+   * Get student notifications
+   * GET /api/student/notifications
+   */
+  static async getNotifications(req: AuthenticatedRequest, res: Response) {
+    try {
+      const studentId = req.user!.userId;
+      const { page = 1, limit = 20, unread_only = false } = req.query;
+      const connection = getPool();
+      
+      let whereClause = 'WHERE n.user_id = ?';
+      let queryParams = [studentId];
+      
+      if (unread_only === 'true') {
+        whereClause += ' AND n.read_status = FALSE';
+      }
+      
+      queryParams.push(Number(limit), (Number(page) - 1) * Number(limit));
+      
+      const [notifications] = await connection.execute(`
+        SELECT 
+          n.id,
+          n.type,
+          n.message,
+          n.read_status,
+          n.created_at
+        FROM notifications n
+        ${whereClause}
+        ORDER BY n.created_at DESC
+        LIMIT ? OFFSET ?
+      `, queryParams);
+
+      // Get unread count
+      const [unreadCount] = await connection.execute(
+        'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read_status = FALSE',
+        [studentId]
+      );
+
+      return res.json({
+        success: true,
+        data: { 
+          notifications,
+          unread_count: (unreadCount as RowDataPacket[])[0].count
+        }
+      });
+    } catch (error) {
+      console.error('Get student notifications error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve notifications'
+      });
+    }
+  }
+
+  /**
+   * Mark notification as read
+   * PUT /api/student/notifications/:id/read
+   */
+  static async markNotificationRead(req: AuthenticatedRequest, res: Response) {
+    try {
+      const notificationId = req.params.id;
+      const studentId = req.user!.userId;
+      const connection = getPool();
+      
+      await connection.execute(
+        'UPDATE notifications SET read_status = TRUE WHERE id = ? AND user_id = ?',
+        [notificationId, studentId]
+      );
+
+      return res.json({
+        success: true,
+        message: 'Notification marked as read'
+      });
+    } catch (error) {
+      console.error('Mark notification read error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to mark notification as read'
+      });
+    }
+  }
+
+  /**
+   * Mark all notifications as read
+   * PUT /api/student/notifications/mark-all-read
+   */
+  static async markAllNotificationsRead(req: AuthenticatedRequest, res: Response) {
+    try {
+      const studentId = req.user!.userId;
+      const connection = getPool();
+      
+      await connection.execute(
+        'UPDATE notifications SET read_status = TRUE WHERE user_id = ? AND read_status = FALSE',
+        [studentId]
+      );
+
+      return res.json({
+        success: true,
+        message: 'All notifications marked as read'
+      });
+    } catch (error) {
+      console.error('Mark all notifications read error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to mark all notifications as read'
       });
     }
   }

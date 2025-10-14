@@ -972,4 +972,288 @@ export class AdminController {
       });
     }
   }
+
+  // ===== CALENDAR & NOTIFICATION MANAGEMENT =====
+
+  /**
+   * Get all calendar events (admin view)
+   * GET /api/admin/calendar
+   */
+  static async getCalendar(req: AuthenticatedRequest, res: Response) {
+    try {
+      const connection = getPool();
+      
+      const [events] = await connection.execute(`
+        SELECT 
+          'assignment' as type,
+          a.id,
+          a.title,
+          a.description,
+          a.due_date as date,
+          c.title as course_name,
+          c.course_code,
+          c.color as course_color,
+          s.name as section_name,
+          u.name as teacher_name,
+          COUNT(DISTINCT sub.id) as submission_count,
+          COUNT(DISTINCT e.user_id) as total_students,
+          CASE 
+            WHEN a.due_date < NOW() THEN 'overdue'
+            WHEN a.due_date <= DATE_ADD(NOW(), INTERVAL 3 DAY) THEN 'due_soon'
+            ELSE 'pending'
+          END as status
+        FROM assignments a
+        JOIN sections s ON a.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        JOIN users u ON c.teacher_id = u.id
+        LEFT JOIN submissions sub ON a.id = sub.assignment_id
+        LEFT JOIN enrollments e ON c.id = e.course_id
+        GROUP BY a.id, a.title, a.description, a.due_date, c.title, c.course_code, c.color, s.name, u.name
+        
+        UNION ALL
+        
+        SELECT 
+          'event' as type,
+          ce.id,
+          ce.title,
+          ce.description,
+          ce.date,
+          c.title as course_name,
+          c.course_code,
+          c.color as course_color,
+          s.name as section_name,
+          u.name as teacher_name,
+          0 as submission_count,
+          0 as total_students,
+          ce.type as status
+        FROM calendar_events ce
+        JOIN sections s ON ce.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        JOIN users u ON c.teacher_id = u.id
+        
+        UNION ALL
+        
+        SELECT 
+          'university_event' as type,
+          ue.id,
+          ue.title,
+          ue.description,
+          ue.date,
+          'University-wide' as course_name,
+          'ALL' as course_code,
+          '#9333ea' as course_color,
+          'All Sections' as section_name,
+          'Administration' as teacher_name,
+          0 as submission_count,
+          0 as total_students,
+          ue.type as status
+        FROM university_events ue
+        
+        ORDER BY date ASC
+      `);
+
+      return res.json({
+        success: true,
+        data: { events }
+      });
+    } catch (error) {
+      console.error('Get admin calendar error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve calendar events'
+      });
+    }
+  }
+
+  /**
+   * Create university-wide calendar event
+   * POST /api/admin/calendar/university-events
+   */
+  static async createUniversityEvent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { title, description, date, type, priority } = req.body;
+      const connection = getPool();
+      
+      const [result] = await connection.execute(`
+        INSERT INTO university_events (title, description, date, type, priority, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `, [title, description, date, type, priority || 'normal', req.user!.userId]);
+
+      const eventId = (result as ResultSetHeader).insertId;
+
+      // Create notifications for all users about university events if high priority
+      if (priority === 'high') {
+        await connection.execute(`
+          INSERT INTO notifications (user_id, type, message, read_status)
+          SELECT id, 'due_event', CONCAT('University Event: ', ?, ' - ', DATE_FORMAT(?, '%M %d, %Y')), FALSE
+          FROM users WHERE role IN ('student', 'teacher')
+        `, [title, date]);
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'University event created successfully',
+        data: {
+          id: eventId,
+          title,
+          description,
+          date,
+          type,
+          priority
+        }
+      });
+    } catch (error) {
+      console.error('Create university event error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create university event'
+      });
+    }
+  }
+
+  /**
+   * Update university event
+   * PUT /api/admin/calendar/university-events/:id
+   */
+  static async updateUniversityEvent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const eventId = req.params.id;
+      const { title, description, date, type, priority } = req.body;
+      const connection = getPool();
+      
+      await connection.execute(`
+        UPDATE university_events 
+        SET title = ?, description = ?, date = ?, type = ?, priority = ?
+        WHERE id = ?
+      `, [title, description, date, type, priority, eventId]);
+
+      return res.json({
+        success: true,
+        message: 'University event updated successfully'
+      });
+    } catch (error) {
+      console.error('Update university event error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update university event'
+      });
+    }
+  }
+
+  /**
+   * Delete university event
+   * DELETE /api/admin/calendar/university-events/:id
+   */
+  static async deleteUniversityEvent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const eventId = req.params.id;
+      const connection = getPool();
+      
+      await connection.execute('DELETE FROM university_events WHERE id = ?', [eventId]);
+
+      return res.json({
+        success: true,
+        message: 'University event deleted successfully'
+      });
+    } catch (error) {
+      console.error('Delete university event error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete university event'
+      });
+    }
+  }
+
+  /**
+   * Get system notifications
+   * GET /api/admin/notifications
+   */
+  static async getNotifications(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { page = 1, limit = 20, type, read_status } = req.query;
+      const connection = getPool();
+      
+      let whereConditions = [];
+      let queryParams = [];
+      
+      if (type) {
+        whereConditions.push('n.type = ?');
+        queryParams.push(type);
+      }
+      
+      if (read_status !== undefined) {
+        whereConditions.push('n.read_status = ?');
+        queryParams.push(read_status === 'true');
+      }
+      
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+      
+      queryParams.push(Number(limit), (Number(page) - 1) * Number(limit));
+      
+      const [notifications] = await connection.execute(`
+        SELECT 
+          n.id,
+          n.type,
+          n.message,
+          n.read_status,
+          n.created_at,
+          u.name as user_name,
+          u.email as user_email,
+          u.role as user_role
+        FROM notifications n
+        JOIN users u ON n.user_id = u.id
+        ${whereClause}
+        ORDER BY n.created_at DESC
+        LIMIT ? OFFSET ?
+      `, queryParams);
+
+      return res.json({
+        success: true,
+        data: { notifications }
+      });
+    } catch (error) {
+      console.error('Get notifications error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve notifications'
+      });
+    }
+  }
+
+  /**
+   * Create system-wide notification
+   * POST /api/admin/notifications/broadcast
+   */
+  static async broadcastNotification(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { message, type, target_roles } = req.body;
+      const connection = getPool();
+      
+      let roleCondition = '';
+      let queryParams = [type, message];
+      
+      if (target_roles && target_roles.length > 0) {
+        const roleMarks = target_roles.map(() => '?').join(', ');
+        roleCondition = `WHERE role IN (${roleMarks})`;
+        queryParams.push(...target_roles);
+      }
+      
+      await connection.execute(`
+        INSERT INTO notifications (user_id, type, message, read_status)
+        SELECT id, ?, ?, FALSE
+        FROM users ${roleCondition}
+      `, queryParams);
+
+      return res.status(201).json({
+        success: true,
+        message: 'Notification broadcasted successfully'
+      });
+    } catch (error) {
+      console.error('Broadcast notification error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to broadcast notification'
+      });
+    }
+  }
 }

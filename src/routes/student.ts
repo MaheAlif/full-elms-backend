@@ -32,6 +32,11 @@ router.get('/calendar', StudentController.getCalendar);
 // ===== PROFILE ROUTES =====
 router.get('/profile', StudentController.getProfile);
 
+// ===== NOTIFICATION ROUTES =====
+router.get('/notifications', StudentController.getNotifications);
+router.put('/notifications/:id/read', validateIdParam, StudentController.markNotificationRead);
+router.put('/notifications/mark-all-read', StudentController.markAllNotificationsRead);
+
 // ===== CHAT ROUTES (Placeholder for future implementation) =====
 router.get('/chat', (req, res) => {
   res.status(501).json({

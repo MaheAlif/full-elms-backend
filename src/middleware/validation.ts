@@ -147,8 +147,32 @@ export const schemas = {
   createCalendarEvent: Joi.object({
     section_id: Joi.number().integer().positive().required(),
     title: Joi.string().min(3).max(255).required(),
+    description: Joi.string().max(1000).allow('').optional(),
     date: Joi.date().required(),
     type: Joi.string().valid('assignment', 'exam', 'meeting', 'class').required()
+  }),
+
+  // Announcement validation
+  createAnnouncement: Joi.object({
+    section_id: Joi.number().integer().positive().required(),
+    title: Joi.string().min(3).max(255).required(),
+    content: Joi.string().min(10).max(2000).required()
+  }),
+
+  // University event validation
+  createUniversityEvent: Joi.object({
+    title: Joi.string().min(3).max(255).required(),
+    description: Joi.string().max(1000).allow('').optional(),
+    date: Joi.date().required(),
+    type: Joi.string().valid('holiday', 'exam_week', 'registration', 'orientation', 'graduation', 'maintenance', 'event').required(),
+    priority: Joi.string().valid('low', 'normal', 'high').default('normal')
+  }),
+
+  // Broadcast notification validation
+  broadcastNotification: Joi.object({
+    message: Joi.string().min(10).max(500).required(),
+    type: Joi.string().valid('assignment', 'due_event', 'reminder', 'grade_posted').required(),
+    target_roles: Joi.array().items(Joi.string().valid('student', 'teacher', 'admin')).min(1).required()
   }),
 
   // Submission grading validation
@@ -196,6 +220,9 @@ export const validateCreateMaterial = validate(schemas.createMaterial);
 export const validateSendMessage = validate(schemas.sendMessage);
 export const validateCreateEnrollment = validate(schemas.createEnrollment);
 export const validateCreateCalendarEvent = validate(schemas.createCalendarEvent);
+export const validateCreateAnnouncement = validate(schemas.createAnnouncement);
+export const validateCreateUniversityEvent = validate(schemas.createUniversityEvent);
+export const validateBroadcastNotification = validate(schemas.broadcastNotification);
 export const validateGradeSubmission = validate(schemas.gradeSubmission);
 export const validateSubmissionUpload = validate(schemas.submitAssignment);
 export const validateAiQuery = validate(schemas.aiQuery);

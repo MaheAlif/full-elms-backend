@@ -8,7 +8,9 @@ import {
   validateUpdateAssignment,
   validateGradeSubmission,
   validateIdParam,
-  validatePagination
+  validatePagination,
+  validateCreateCalendarEvent,
+  validateCreateAnnouncement
 } from '../middleware/validation';
 
 const router = Router();
@@ -43,5 +45,16 @@ router.delete('/assignments/:id', validateIdParam, TeacherController.deleteAssig
 router.get('/assignments/:id/submissions', validateIdParam, TeacherController.getAssignmentSubmissions);
 router.get('/submissions/:id/download', validateIdParam, TeacherController.downloadSubmission);
 router.put('/submissions/:id/grade', validateIdParam, validateGradeSubmission, TeacherController.gradeSubmission);
+
+// ===== CALENDAR & ANNOUNCEMENT ROUTES =====
+router.get('/calendar', TeacherController.getCalendar);
+router.post('/calendar/events', validateCreateCalendarEvent, TeacherController.createCalendarEvent);
+router.put('/calendar/events/:id', validateIdParam, validateCreateCalendarEvent, TeacherController.updateCalendarEvent);
+router.delete('/calendar/events/:id', validateIdParam, TeacherController.deleteCalendarEvent);
+router.post('/announcements', validateCreateAnnouncement, TeacherController.createAnnouncement);
+
+// ===== NOTIFICATION ROUTES =====
+router.get('/notifications', TeacherController.getNotifications);
+router.put('/notifications/:id/read', validateIdParam, TeacherController.markNotificationRead);
 
 export default router;

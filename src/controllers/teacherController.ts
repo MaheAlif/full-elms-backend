@@ -441,6 +441,26 @@ export class TeacherController {
 
       const assignmentId = (result as ResultSetHeader).insertId;
 
+      // Automatically create calendar event for assignment deadline
+      if (due_date) {
+        try {
+          await connection.execute(`
+            INSERT INTO calendar_events (section_id, title, description, date, type)
+            VALUES (?, ?, ?, DATE(?), 'assignment')
+          `, [
+            section_id, 
+            `Assignment Due: ${title}`, 
+            `Assignment "${title}" submission deadline`, 
+            due_date
+          ]);
+          
+          console.log(`📅 Calendar event created for assignment: ${title}`);
+        } catch (calendarError) {
+          console.warn('Failed to create calendar event for assignment:', calendarError);
+          // Don't fail the assignment creation if calendar event fails
+        }
+      }
+
       return res.status(201).json({
         success: true,
         message: 'Assignment created successfully',
@@ -494,6 +514,30 @@ export class TeacherController {
         SET title = ?, description = ?, due_date = ?, total_marks = ?
         WHERE id = ?
       `, [title, description, due_date, total_marks, assignmentId]);
+
+      // Update corresponding calendar event if it exists
+      if (due_date) {
+        try {
+          await connection.execute(`
+            UPDATE calendar_events 
+            SET title = ?, description = ?, date = DATE(?)
+            WHERE title LIKE CONCAT('Assignment Due: ', (SELECT title FROM assignments WHERE id = ? LIMIT 1))
+            AND section_id = (SELECT section_id FROM assignments WHERE id = ? LIMIT 1)
+            AND type = 'assignment'
+          `, [
+            `Assignment Due: ${title}`, 
+            `Assignment "${title}" submission deadline`, 
+            due_date,
+            assignmentId,
+            assignmentId
+          ]);
+          
+          console.log(`📅 Calendar event updated for assignment: ${title}`);
+        } catch (calendarError) {
+          console.warn('Failed to update calendar event for assignment:', calendarError);
+          // Don't fail the assignment update if calendar event update fails
+        }
+      }
 
       return res.json({
         success: true,
@@ -878,6 +922,344 @@ export class TeacherController {
       return res.status(500).json({
         success: false,
         message: 'Failed to create section'
+      });
+    }
+  }
+
+  // ===== CALENDAR MANAGEMENT =====
+
+  /**
+   * Get calendar events for teacher's courses
+   * GET /api/teacher/calendar
+   */
+  static async getCalendar(req: AuthenticatedRequest, res: Response) {
+    try {
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      const [events] = await connection.execute(`
+        SELECT 
+          'assignment' as type,
+          a.id,
+          a.title,
+          a.description,
+          a.due_date as date,
+          c.title as course_name,
+          c.course_code,
+          c.color as course_color,
+          s.name as section_name,
+          COUNT(DISTINCT sub.id) as submission_count,
+          COUNT(DISTINCT e.user_id) as total_students,
+          CASE 
+            WHEN a.due_date < NOW() THEN 'overdue'
+            WHEN a.due_date <= DATE_ADD(NOW(), INTERVAL 3 DAY) THEN 'due_soon'
+            ELSE 'pending'
+          END as status
+        FROM assignments a
+        JOIN sections s ON a.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        LEFT JOIN submissions sub ON a.id = sub.assignment_id
+        LEFT JOIN enrollments e ON c.id = e.course_id
+        WHERE c.teacher_id = ?
+        GROUP BY a.id, a.title, a.description, a.due_date, c.title, c.course_code, c.color, s.name
+        
+        UNION ALL
+        
+        SELECT 
+          'event' as type,
+          ce.id,
+          ce.title,
+          ce.description,
+          ce.date,
+          c.title as course_name,
+          c.course_code,
+          c.color as course_color,
+          s.name as section_name,
+          0 as submission_count,
+          0 as total_students,
+          ce.type as status
+        FROM calendar_events ce
+        JOIN sections s ON ce.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        WHERE c.teacher_id = ?
+        
+        ORDER BY date ASC
+      `, [teacherId, teacherId]);
+
+      return res.json({
+        success: true,
+        data: { events }
+      });
+    } catch (error) {
+      console.error('Get teacher calendar error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve calendar events'
+      });
+    }
+  }
+
+  /**
+   * Create calendar event
+   * POST /api/teacher/calendar/events
+   */
+  static async createCalendarEvent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { section_id, title, description, date, type } = req.body;
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      // Verify teacher owns the section
+      const [sectionCheck] = await connection.execute(
+        'SELECT id FROM sections s JOIN courses c ON s.course_id = c.id WHERE s.id = ? AND c.teacher_id = ?',
+        [section_id, teacherId]
+      );
+
+      if ((sectionCheck as RowDataPacket[]).length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: Section not in your courses'
+        });
+      }
+
+      const [result] = await connection.execute(`
+        INSERT INTO calendar_events (section_id, title, description, date, type)
+        VALUES (?, ?, ?, ?, ?)
+      `, [section_id, title, description, date, type]);
+
+      const eventId = (result as ResultSetHeader).insertId;
+
+      return res.status(201).json({
+        success: true,
+        message: 'Calendar event created successfully',
+        data: {
+          id: eventId,
+          section_id,
+          title,
+          description,
+          date,
+          type
+        }
+      });
+    } catch (error) {
+      console.error('Create calendar event error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create calendar event'
+      });
+    }
+  }
+
+  /**
+   * Update calendar event
+   * PUT /api/teacher/calendar/events/:id
+   */
+  static async updateCalendarEvent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const eventId = req.params.id;
+      const { title, description, date, type } = req.body;
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      // Verify teacher owns the event
+      const [eventCheck] = await connection.execute(
+        'SELECT ce.id FROM calendar_events ce JOIN sections s ON ce.section_id = s.id JOIN courses c ON s.course_id = c.id WHERE ce.id = ? AND c.teacher_id = ?',
+        [eventId, teacherId]
+      );
+
+      if ((eventCheck as RowDataPacket[]).length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: Event not in your courses'
+        });
+      }
+
+      await connection.execute(`
+        UPDATE calendar_events 
+        SET title = ?, description = ?, date = ?, type = ?
+        WHERE id = ?
+      `, [title, description, date, type, eventId]);
+
+      return res.json({
+        success: true,
+        message: 'Calendar event updated successfully'
+      });
+    } catch (error) {
+      console.error('Update calendar event error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update calendar event'
+      });
+    }
+  }
+
+  /**
+   * Delete calendar event
+   * DELETE /api/teacher/calendar/events/:id
+   */
+  static async deleteCalendarEvent(req: AuthenticatedRequest, res: Response) {
+    try {
+      const eventId = req.params.id;
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      // Verify teacher owns the event
+      const [eventCheck] = await connection.execute(
+        'SELECT ce.id FROM calendar_events ce JOIN sections s ON ce.section_id = s.id JOIN courses c ON s.course_id = c.id WHERE ce.id = ? AND c.teacher_id = ?',
+        [eventId, teacherId]
+      );
+
+      if ((eventCheck as RowDataPacket[]).length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: Event not in your courses'
+        });
+      }
+
+      await connection.execute('DELETE FROM calendar_events WHERE id = ?', [eventId]);
+
+      return res.json({
+        success: true,
+        message: 'Calendar event deleted successfully'
+      });
+    } catch (error) {
+      console.error('Delete calendar event error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete calendar event'
+      });
+    }
+  }
+
+  /**
+   * Create announcement for section
+   * POST /api/teacher/announcements
+   */
+  static async createAnnouncement(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { section_id, title, content } = req.body;
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      // Verify teacher owns the section
+      const [sectionCheck] = await connection.execute(
+        'SELECT id FROM sections s JOIN courses c ON s.course_id = c.id WHERE s.id = ? AND c.teacher_id = ?',
+        [section_id, teacherId]
+      );
+
+      if ((sectionCheck as RowDataPacket[]).length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: Section not in your courses'
+        });
+      }
+
+      const [result] = await connection.execute(`
+        INSERT INTO announcements (section_id, title, content)
+        VALUES (?, ?, ?)
+      `, [section_id, title, content]);
+
+      const announcementId = (result as ResultSetHeader).insertId;
+
+      return res.status(201).json({
+        success: true,
+        message: 'Announcement created successfully',
+        data: {
+          id: announcementId,
+          section_id,
+          title,
+          content
+        }
+      });
+    } catch (error) {
+      console.error('Create announcement error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create announcement'
+      });
+    }
+  }
+
+  // ===== NOTIFICATIONS MANAGEMENT =====
+
+  /**
+   * Get teacher notifications
+   * GET /api/teacher/notifications
+   */
+  static async getNotifications(req: AuthenticatedRequest, res: Response) {
+    try {
+      const teacherId = req.user!.userId;
+      const { page = 1, limit = 20, unread_only = false } = req.query;
+      const connection = getPool();
+      
+      let whereClause = 'WHERE n.user_id = ?';
+      let queryParams = [teacherId];
+      
+      if (unread_only === 'true') {
+        whereClause += ' AND n.read_status = FALSE';
+      }
+      
+      queryParams.push(Number(limit), (Number(page) - 1) * Number(limit));
+      
+      const [notifications] = await connection.execute(`
+        SELECT 
+          n.id,
+          n.type,
+          n.message,
+          n.read_status,
+          n.created_at
+        FROM notifications n
+        ${whereClause}
+        ORDER BY n.created_at DESC
+        LIMIT ? OFFSET ?
+      `, queryParams);
+
+      // Get unread count
+      const [unreadCount] = await connection.execute(
+        'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read_status = FALSE',
+        [teacherId]
+      );
+
+      return res.json({
+        success: true,
+        data: { 
+          notifications,
+          unread_count: (unreadCount as RowDataPacket[])[0].count
+        }
+      });
+    } catch (error) {
+      console.error('Get teacher notifications error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve notifications'
+      });
+    }
+  }
+
+  /**
+   * Mark notification as read
+   * PUT /api/teacher/notifications/:id/read
+   */
+  static async markNotificationRead(req: AuthenticatedRequest, res: Response) {
+    try {
+      const notificationId = req.params.id;
+      const teacherId = req.user!.userId;
+      const connection = getPool();
+      
+      await connection.execute(
+        'UPDATE notifications SET read_status = TRUE WHERE id = ? AND user_id = ?',
+        [notificationId, teacherId]
+      );
+
+      return res.json({
+        success: true,
+        message: 'Notification marked as read'
+      });
+    } catch (error) {
+      console.error('Mark notification read error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to mark notification as read'
       });
     }
   }

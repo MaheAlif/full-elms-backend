@@ -9,7 +9,9 @@ import {
   validateAssignTeacher,
   validateEnrollStudent,
   validateIdParam,
-  validatePagination
+  validatePagination,
+  validateCreateUniversityEvent,
+  validateBroadcastNotification
 } from '../middleware/validation';
 
 const router = Router();
@@ -46,5 +48,13 @@ router.get('/courses/:id/details', validateIdParam, AdminController.getCourseDet
 
 // ===== SYSTEM STATISTICS ROUTES =====
 router.get('/stats', AdminController.getSystemStats);
+
+// ===== CALENDAR & NOTIFICATION MANAGEMENT ROUTES =====
+router.get('/calendar', AdminController.getCalendar);
+router.post('/calendar/university-events', validateCreateUniversityEvent, AdminController.createUniversityEvent);
+router.put('/calendar/university-events/:id', validateIdParam, validateCreateUniversityEvent, AdminController.updateUniversityEvent);
+router.delete('/calendar/university-events/:id', validateIdParam, AdminController.deleteUniversityEvent);
+router.get('/notifications', AdminController.getNotifications);
+router.post('/notifications/broadcast', validateBroadcastNotification, AdminController.broadcastNotification);
 
 export default router;
