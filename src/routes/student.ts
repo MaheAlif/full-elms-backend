@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { StudentController } from '../controllers/studentController';
 import { ChatController } from '../controllers/chatController';
+import { AIController } from '../controllers/aiController';
 import { authenticateToken, requireStudent } from '../middleware/auth';
 import { uploadSubmission } from '../middleware/upload';
 import {
@@ -43,5 +44,12 @@ router.get('/courses/:courseId/chat', ChatController.getCourseChat);
 router.post('/courses/:courseId/chat', ChatController.sendMessage);
 router.get('/courses/:courseId/chat/participants', ChatController.getChatParticipants);
 router.delete('/courses/:courseId/chat/:messageId', ChatController.deleteMessage);
+
+// ===== AI ASSISTANT ROUTES =====
+router.post('/ai/chat', AIController.chat);
+router.get('/ai/history', AIController.getHistory);
+router.post('/ai/add-material/:materialId', AIController.addMaterialToContext);
+router.get('/ai/context', AIController.getContext);
+router.delete('/ai/clear', AIController.clearHistory);
 
 export default router;
