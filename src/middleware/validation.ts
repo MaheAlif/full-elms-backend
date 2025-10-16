@@ -92,13 +92,25 @@ export const schemas = {
 
   enrollStudent: Joi.object({
     student_id: Joi.number().integer().positive().required(),
-    course_id: Joi.number().integer().positive().required()
+    section_id: Joi.number().integer().positive().required()
   }),
 
   // Section validation schemas
   createSection: Joi.object({
     course_id: Joi.number().integer().positive().required(),
-    name: Joi.string().min(3).max(100).required()
+    name: Joi.string().min(3).max(100).required(),
+    teacher_id: Joi.number().integer().positive().optional(),
+    max_capacity: Joi.number().integer().min(1).max(200).optional()
+  }),
+
+  updateSection: Joi.object({
+    name: Joi.string().min(3).max(100).optional(),
+    teacher_id: Joi.number().integer().positive().allow(null).optional(),
+    max_capacity: Joi.number().integer().min(1).max(200).optional()
+  }),
+
+  assignTeacherToSection: Joi.object({
+    teacher_id: Joi.number().integer().positive().required()
   }),
 
   // Assignment validation schemas

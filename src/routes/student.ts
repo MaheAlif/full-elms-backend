@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { StudentController } from '../controllers/studentController';
+import { ChatController } from '../controllers/chatController';
 import { authenticateToken, requireStudent } from '../middleware/auth';
 import { uploadSubmission } from '../middleware/upload';
 import {
@@ -37,19 +38,10 @@ router.get('/notifications', StudentController.getNotifications);
 router.put('/notifications/:id/read', validateIdParam, StudentController.markNotificationRead);
 router.put('/notifications/mark-all-read', StudentController.markAllNotificationsRead);
 
-// ===== CHAT ROUTES (Placeholder for future implementation) =====
-router.get('/chat', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Student chat endpoint - Implementation coming in Phase 6'
-  });
-});
-
-router.post('/chat/send', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Student chat send endpoint - Implementation coming in Phase 6'
-  });
-});
+// ===== CHAT ROUTES =====
+router.get('/courses/:courseId/chat', ChatController.getCourseChat);
+router.post('/courses/:courseId/chat', ChatController.sendMessage);
+router.get('/courses/:courseId/chat/participants', ChatController.getChatParticipants);
+router.delete('/courses/:courseId/chat/:messageId', ChatController.deleteMessage);
 
 export default router;

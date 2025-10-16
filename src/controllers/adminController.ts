@@ -505,58 +505,80 @@ export class AdminController {
    */
   static async enrollStudent(req: AuthenticatedRequest, res: Response) {
     try {
-      const { student_id, course_id } = req.body;
+      const { student_id, section_id } = req.body;
       
       const connection = getPool();
       
       // Verify student exists and has student role
-      const [student] = await connection.execute(
-        'SELECT id FROM users WHERE id = ? AND role = "student"',
+      const [student] = await connection.execute<RowDataPacket[]>(
+        'SELECT id, name FROM users WHERE id = ? AND role = "student"',
         [student_id]
       );
 
-      if ((student as RowDataPacket[]).length === 0) {
+      if (student.length === 0) {
         return res.status(404).json({
           success: false,
           message: 'Student not found'
         });
       }
 
-      // Verify course exists
-      const [course] = await connection.execute(
-        'SELECT id FROM courses WHERE id = ?',
-        [course_id]
+      const studentInfo = student[0];
+
+      // Verify section exists and get course info
+      const [section] = await connection.execute<RowDataPacket[]>(
+        `SELECT s.id, s.name, s.max_capacity, s.current_enrollment,
+                c.title as course_title, c.course_code
+         FROM sections s
+         JOIN courses c ON s.course_id = c.id
+         WHERE s.id = ?`,
+        [section_id]
       );
 
-      if ((course as RowDataPacket[]).length === 0) {
+      if (section.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'Course not found'
+          message: 'Section not found'
+        });
+      }
+
+      const sectionInfo = section[0];
+
+      // Check capacity
+      if (sectionInfo.current_enrollment >= sectionInfo.max_capacity) {
+        return res.status(400).json({
+          success: false,
+          message: `Section is full (${sectionInfo.max_capacity}/${sectionInfo.max_capacity} students)`
         });
       }
 
       // Check if enrollment already exists
       const [existingEnrollment] = await connection.execute(
-        'SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?',
-        [student_id, course_id]
+        'SELECT id FROM enrollments WHERE user_id = ? AND section_id = ?',
+        [student_id, section_id]
       );
 
       if ((existingEnrollment as RowDataPacket[]).length > 0) {
         return res.status(400).json({
           success: false,
-          message: 'Student is already enrolled in this course'
+          message: 'Student is already enrolled in this section'
         });
       }
 
       // Create enrollment
       await connection.execute(
-        'INSERT INTO enrollments (user_id, course_id, enrolled_at) VALUES (?, ?, NOW())',
-        [student_id, course_id]
+        'INSERT INTO enrollments (user_id, section_id, enrolled_at) VALUES (?, ?, NOW())',
+        [student_id, section_id]
+      );
+
+      // Update section enrollment count
+      await connection.execute(
+        'UPDATE sections SET current_enrollment = current_enrollment + 1 WHERE id = ?',
+        [section_id]
       );
 
       return res.json({
         success: true,
-        message: 'Student enrolled successfully'
+        message: `${studentInfo.name} enrolled in ${sectionInfo.course_code} - ${sectionInfo.name} successfully`
       });
     } catch (error) {
       console.error('Enroll student error:', error);
@@ -577,16 +599,33 @@ export class AdminController {
       
       const connection = getPool();
       
-      const [result] = await connection.execute(
-        'DELETE FROM enrollments WHERE id = ?',
+      // Get section_id before deleting
+      const [enrollment] = await connection.execute<RowDataPacket[]>(
+        'SELECT section_id FROM enrollments WHERE id = ?',
         [enrollmentId]
       );
 
-      if ((result as ResultSetHeader).affectedRows === 0) {
+      if (enrollment.length === 0) {
         return res.status(404).json({
           success: false,
           message: 'Enrollment not found'
         });
+      }
+
+      const sectionId = enrollment[0].section_id;
+
+      // Delete enrollment
+      await connection.execute(
+        'DELETE FROM enrollments WHERE id = ?',
+        [enrollmentId]
+      );
+
+      // Update section enrollment count
+      if (sectionId) {
+        await connection.execute(
+          'UPDATE sections SET current_enrollment = GREATEST(current_enrollment - 1, 0) WHERE id = ?',
+          [sectionId]
+        );
       }
 
       return res.json({

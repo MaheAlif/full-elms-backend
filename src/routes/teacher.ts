@@ -27,8 +27,8 @@ router.get('/courses/:id/details', validateIdParam, TeacherController.getCourseD
 router.get('/students', TeacherController.getStudents);
 
 // ===== SECTION MANAGEMENT ROUTES =====
+// Teachers can only VIEW their assigned sections (admin creates sections)
 router.get('/sections', TeacherController.getSections);
-router.post('/sections', validateCreateSection, TeacherController.createSection);
 
 // ===== MATERIAL MANAGEMENT ROUTES =====
 router.get('/materials', TeacherController.getMaterials);

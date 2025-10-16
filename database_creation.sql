@@ -1,5 +1,5 @@
 -- Create Database
-CREATE DATABASE elms;
+CREATE DATABASE IF NOT EXISTS elms;
 USE elms;
 
 -- Users table
@@ -11,19 +11,27 @@ CREATE TABLE users (
     role ENUM('student','teacher','admin') NOT NULL,
     avatar_url VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_role (role),
+    INDEX idx_email (email)
 );
 
--- Courses table
+-- Courses table (UPDATED SCHEMA WITH NEW FIELDS)
 CREATE TABLE courses (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
+    course_code VARCHAR(20) NOT NULL UNIQUE,
     description TEXT,
     teacher_id BIGINT NOT NULL,
+    credits INT DEFAULT 3,
+    semester VARCHAR(50),
+    academic_year VARCHAR(20),
     color VARCHAR(50),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_course_code (course_code),
+    INDEX idx_teacher_id (teacher_id)
 );
 
 -- Sections table
@@ -32,7 +40,8 @@ CREATE TABLE sections (
     course_id BIGINT NOT NULL,
     name VARCHAR(100) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+    INDEX idx_course_id (course_id)
 );
 
 -- Enrollments table
@@ -43,7 +52,9 @@ CREATE TABLE enrollments (
     enrolled_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,
-    UNIQUE (user_id, section_id) -- prevents duplicate enrollment
+    UNIQUE KEY unique_enrollment (user_id, section_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_section_id (section_id)
 );
 
 -- Announcements
@@ -53,7 +64,8 @@ CREATE TABLE announcements (
     title VARCHAR(255),
     content TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,
+    INDEX idx_section_id (section_id)
 );
 
 -- Materials (PDF, PPTX, videos, etc.)
@@ -85,11 +97,14 @@ CREATE TABLE submissions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     assignment_id BIGINT NOT NULL,
     student_id BIGINT NOT NULL,
-    file_path VARCHAR(255) NOT NULL,  -- Store file path
+    file_path VARCHAR(255) NOT NULL,
     submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     grade INT,
+    feedback TEXT,
     FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_assignment_id (assignment_id),
+    INDEX idx_student_id (student_id)
 );
 
 -- Calendar events
@@ -97,10 +112,27 @@ CREATE TABLE calendar_events (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     section_id BIGINT NOT NULL,
     title VARCHAR(255),
+    description TEXT,
     date DATE,
     type ENUM('assignment','exam','meeting','class') NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,
+    INDEX idx_section_id (section_id),
+    INDEX idx_date (date)
+);
+
+-- University Events table (system-wide events)
+CREATE TABLE university_events (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    date DATE NOT NULL,
+    type ENUM('registration','exam_week','holiday','orientation','maintenance','event') NOT NULL,
+    priority ENUM('low','normal','high') DEFAULT 'normal',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_date (date),
+    INDEX idx_type (type)
 );
 
 -- Chat rooms
@@ -108,7 +140,9 @@ CREATE TABLE chat_rooms (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     section_id BIGINT NOT NULL,
     name VARCHAR(255),
-    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,
+    INDEX idx_section_id (section_id)
 );
 
 -- Chat messages
@@ -117,20 +151,27 @@ CREATE TABLE chat_messages (
     room_id BIGINT NOT NULL,
     sender_id BIGINT NOT NULL,
     message TEXT,
+    message_type ENUM('text','image','file') DEFAULT 'text',
+    file_url VARCHAR(500),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_room_id (room_id),
+    INDEX idx_sender_id (sender_id),
+    INDEX idx_timestamp (timestamp)
 );
 
 -- Notifications
 CREATE TABLE notifications (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    type ENUM('assignment','due_event','reminder','grade_posted') NOT NULL,
+    type ENUM('assignment','due_event','reminder','grade_posted','announcement') NOT NULL,
     message TEXT,
     read_status BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_read_status (read_status)
 );
 
 -- AI user context

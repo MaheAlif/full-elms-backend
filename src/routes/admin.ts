@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AdminController } from '../controllers/adminController';
+import { SectionController } from '../controllers/sectionController';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
 import {
   validateAdminCreateCourse,
@@ -25,6 +26,15 @@ router.get('/courses', validatePagination, AdminController.getCourses);
 router.post('/courses', validateAdminCreateCourse, AdminController.createCourse);
 router.put('/courses/:id', validateIdParam, validateAdminUpdateCourse, AdminController.updateCourse);
 router.delete('/courses/:id', validateIdParam, AdminController.deleteCourse);
+
+// ===== SECTION MANAGEMENT ROUTES =====
+router.get('/sections', SectionController.getSections);
+router.post('/sections', SectionController.createSection);
+router.get('/sections/:id', validateIdParam, SectionController.getSectionDetails);
+router.put('/sections/:id', validateIdParam, SectionController.updateSection);
+router.delete('/sections/:id', validateIdParam, SectionController.deleteSection);
+router.post('/sections/:id/assign-teacher', validateIdParam, SectionController.assignTeacher);
+router.delete('/sections/:id/teacher', validateIdParam, SectionController.removeTeacher);
 
 // ===== USER MANAGEMENT ROUTES =====
 router.get('/users', AdminController.getUsers);
