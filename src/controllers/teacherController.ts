@@ -10,14 +10,16 @@ export class TeacherController {
   /**
    * Get teacher's assigned courses
    * GET /api/teacher/courses
+   * Now supports both course-level AND section-level teacher assignments
    */
   static async getCourses(req: AuthenticatedRequest, res: Response) {
     try {
       const teacherId = req.user!.userId;
       const connection = getPool();
       
+      // Get courses where teacher is assigned either at course level OR section level
       const [courses] = await connection.execute(`
-        SELECT 
+        SELECT DISTINCT
           c.id,
           c.title as course_name,
           c.course_code,
@@ -28,16 +30,16 @@ export class TeacherController {
           c.color,
           c.created_at,
           COUNT(DISTINCT e.user_id) as student_count,
-          COUNT(DISTINCT s.id) as section_count,
+          COUNT(DISTINCT sec.id) as section_count,
           COUNT(DISTINCT m.id) as material_count
         FROM courses c
-        LEFT JOIN enrollments e ON c.id = e.course_id
-        LEFT JOIN sections s ON c.id = s.course_id
-        LEFT JOIN materials m ON s.id = m.section_id
-        WHERE c.teacher_id = ?
+        LEFT JOIN sections sec ON c.id = sec.course_id
+        LEFT JOIN enrollments e ON c.id = e.course_id OR sec.id = e.section_id
+        LEFT JOIN materials m ON sec.id = m.section_id
+        WHERE c.teacher_id = ? OR sec.teacher_id = ?
         GROUP BY c.id
         ORDER BY c.created_at DESC
-      `, [teacherId]);
+      `, [teacherId, teacherId]);
 
       return res.json({
         success: true,
@@ -55,6 +57,7 @@ export class TeacherController {
   /**
    * Get course details with sections and students
    * GET /api/teacher/courses/:id/details
+   * Now supports both course-level AND section-level teacher assignments
    */
   static async getCourseDetails(req: AuthenticatedRequest, res: Response) {
     try {
@@ -62,11 +65,13 @@ export class TeacherController {
       const teacherId = req.user!.userId;
       const connection = getPool();
       
-      // Verify teacher owns this course
-      const [ownershipCheck] = await connection.execute(
-        'SELECT id FROM courses WHERE id = ? AND teacher_id = ?',
-        [courseId, teacherId]
-      );
+      // Verify teacher owns this course (either at course level OR section level)
+      const [ownershipCheck] = await connection.execute(`
+        SELECT DISTINCT c.id 
+        FROM courses c
+        LEFT JOIN sections s ON c.id = s.course_id
+        WHERE c.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [courseId, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -91,24 +96,26 @@ export class TeacherController {
         WHERE c.id = ?
       `, [courseId]);
 
-      // Get enrolled students
+      // Get enrolled students (support both course-based and section-based enrollments)
       const [students] = await connection.execute(`
-        SELECT 
+        SELECT DISTINCT
           u.id,
           u.name,
           u.email,
           e.enrolled_at
         FROM enrollments e
         JOIN users u ON e.user_id = u.id
-        WHERE e.course_id = ? AND u.role = 'student'
+        LEFT JOIN sections s ON e.section_id = s.id
+        WHERE (e.course_id = ? OR s.course_id = ?) AND u.role = 'student'
         ORDER BY u.name
-      `, [courseId]);
+      `, [courseId, courseId]);
 
       // Get sections for this course
       const [sections] = await connection.execute(`
         SELECT 
           s.id,
           s.name,
+          s.teacher_id,
           COUNT(DISTINCT m.id) as material_count
         FROM sections s
         LEFT JOIN materials m ON s.id = m.section_id
@@ -156,11 +163,12 @@ export class TeacherController {
           e.enrolled_at
         FROM users u
         JOIN enrollments e ON u.id = e.user_id
-        JOIN courses c ON e.course_id = c.id
-        WHERE c.teacher_id = ? AND u.role = 'student'
+        JOIN sections s ON e.section_id = s.id
+        JOIN courses c ON s.course_id = c.id
+        WHERE (c.teacher_id = ? OR s.teacher_id = ?) AND u.role = 'student'
       `;
       
-      const params: any[] = [teacherId];
+      const params: any[] = [teacherId, teacherId];
       
       if (courseId) {
         query += ' AND c.id = ?';
@@ -211,10 +219,10 @@ export class TeacherController {
         FROM materials m
         JOIN sections s ON m.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE c.teacher_id = ?
+        WHERE (c.teacher_id = ? OR s.teacher_id = ?)
       `;
       
-      const params: any[] = [teacherId];
+      const params: any[] = [teacherId, teacherId];
       
       if (courseId) {
         query += ' AND c.id = ?';
@@ -262,13 +270,13 @@ export class TeacherController {
 
       const connection = getPool();
       
-      // Verify teacher owns the course for this section
+      // Verify teacher owns the course OR section
       const [ownershipCheck] = await connection.execute(`
         SELECT c.id 
         FROM courses c
         JOIN sections s ON c.id = s.course_id
-        WHERE s.id = ? AND c.teacher_id = ?
-      `, [section_id, teacherId]);
+        WHERE s.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [section_id, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -315,14 +323,14 @@ export class TeacherController {
       const teacherId = req.user!.userId;
       const connection = getPool();
       
-      // Verify teacher owns the material
+      // Verify teacher owns the material (course-level OR section-level)
       const [ownershipCheck] = await connection.execute(`
         SELECT m.id, m.file_path
         FROM materials m
         JOIN sections s ON m.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE m.id = ? AND c.teacher_id = ?
-      `, [materialId, teacherId]);
+        WHERE m.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [materialId, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -380,11 +388,11 @@ export class TeacherController {
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
         LEFT JOIN submissions sub ON a.id = sub.assignment_id
-        LEFT JOIN enrollments e ON c.id = e.course_id
-        WHERE c.teacher_id = ?
+        LEFT JOIN enrollments e ON s.id = e.section_id
+        WHERE (c.teacher_id = ? OR s.teacher_id = ?)
       `;
       
-      const params: any[] = [teacherId];
+      const params: any[] = [teacherId, teacherId];
       
       if (courseId) {
         query += ' AND c.id = ?';
@@ -418,13 +426,13 @@ export class TeacherController {
       const { section_id, title, description, due_date, total_marks } = req.body;
       const connection = getPool();
       
-      // Verify teacher owns the course for this section
+      // Verify teacher owns the course OR section
       const [ownershipCheck] = await connection.execute(`
         SELECT c.id 
         FROM courses c
         JOIN sections s ON c.id = s.course_id
-        WHERE s.id = ? AND c.teacher_id = ?
-      `, [section_id, teacherId]);
+        WHERE s.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [section_id, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -498,8 +506,8 @@ export class TeacherController {
         FROM assignments a
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE a.id = ? AND c.teacher_id = ?
-      `, [assignmentId, teacherId]);
+        WHERE a.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [assignmentId, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -568,8 +576,8 @@ export class TeacherController {
         FROM assignments a
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE a.id = ? AND c.teacher_id = ?
-      `, [assignmentId, teacherId]);
+        WHERE a.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [assignmentId, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -621,8 +629,8 @@ export class TeacherController {
         FROM assignments a
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE a.id = ? AND c.teacher_id = ?
-      `, [assignmentId, teacherId]);
+        WHERE a.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [assignmentId, teacherId, teacherId]);
 
       if ((assignmentCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -719,8 +727,8 @@ export class TeacherController {
         JOIN assignments a ON sub.assignment_id = a.id
         JOIN sections s ON a.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE sub.id = ? AND c.teacher_id = ?
-      `, [submissionId, teacherId]);
+        WHERE sub.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [submissionId, teacherId, teacherId]);
 
       if ((submissionCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -795,8 +803,8 @@ export class TeacherController {
         JOIN assignments a ON s.assignment_id = a.id
         JOIN sections sec ON a.section_id = sec.id
         JOIN courses c ON sec.course_id = c.id
-        WHERE s.id = ? AND c.teacher_id = ?
-      `, [submissionId, teacherId]);
+        WHERE s.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+      `, [submissionId, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {
         return res.status(403).json({
@@ -850,10 +858,10 @@ export class TeacherController {
         JOIN courses c ON s.course_id = c.id
         LEFT JOIN materials m ON s.id = m.section_id
         LEFT JOIN assignments a ON s.id = a.section_id
-        WHERE c.teacher_id = ?
+        WHERE (c.teacher_id = ? OR s.teacher_id = ?)
       `;
       
-      const params: any[] = [teacherId];
+      const params: any[] = [teacherId, teacherId];
       
       if (courseId) {
         query += ' AND c.id = ?';
@@ -960,7 +968,7 @@ export class TeacherController {
         JOIN courses c ON s.course_id = c.id
         LEFT JOIN submissions sub ON a.id = sub.assignment_id
         LEFT JOIN enrollments e ON c.id = e.course_id
-        WHERE c.teacher_id = ?
+        WHERE (c.teacher_id = ? OR s.teacher_id = ?)
         GROUP BY a.id, a.title, a.description, a.due_date, c.title, c.course_code, c.color, s.name
         
         UNION ALL
@@ -981,10 +989,9 @@ export class TeacherController {
         FROM calendar_events ce
         JOIN sections s ON ce.section_id = s.id
         JOIN courses c ON s.course_id = c.id
-        WHERE c.teacher_id = ?
-        
+        WHERE (c.teacher_id = ? OR s.teacher_id = ?)
         ORDER BY date ASC
-      `, [teacherId, teacherId]);
+      `, [teacherId, teacherId, teacherId, teacherId]);
 
       return res.json({
         success: true,
@@ -1011,7 +1018,7 @@ export class TeacherController {
       
       // Verify teacher owns the section
       const [sectionCheck] = await connection.execute(
-        'SELECT id FROM sections s JOIN courses c ON s.course_id = c.id WHERE s.id = ? AND c.teacher_id = ?',
+        'SELECT id FROM sections s JOIN courses c ON s.course_id = c.id WHERE s.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)',
         [section_id, teacherId]
       );
 
@@ -1063,7 +1070,7 @@ export class TeacherController {
       
       // Verify teacher owns the event
       const [eventCheck] = await connection.execute(
-        'SELECT ce.id FROM calendar_events ce JOIN sections s ON ce.section_id = s.id JOIN courses c ON s.course_id = c.id WHERE ce.id = ? AND c.teacher_id = ?',
+        'SELECT ce.id FROM calendar_events ce JOIN sections s ON ce.section_id = s.id JOIN courses c ON s.course_id = c.id WHERE ce.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)',
         [eventId, teacherId]
       );
 
@@ -1105,7 +1112,7 @@ export class TeacherController {
       
       // Verify teacher owns the event
       const [eventCheck] = await connection.execute(
-        'SELECT ce.id FROM calendar_events ce JOIN sections s ON ce.section_id = s.id JOIN courses c ON s.course_id = c.id WHERE ce.id = ? AND c.teacher_id = ?',
+        'SELECT ce.id FROM calendar_events ce JOIN sections s ON ce.section_id = s.id JOIN courses c ON s.course_id = c.id WHERE ce.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)',
         [eventId, teacherId]
       );
 
@@ -1143,7 +1150,7 @@ export class TeacherController {
       
       // Verify teacher owns the section
       const [sectionCheck] = await connection.execute(
-        'SELECT id FROM sections s JOIN courses c ON s.course_id = c.id WHERE s.id = ? AND c.teacher_id = ?',
+        'SELECT id FROM sections s JOIN courses c ON s.course_id = c.id WHERE s.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)',
         [section_id, teacherId]
       );
 
