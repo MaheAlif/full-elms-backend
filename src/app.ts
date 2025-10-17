@@ -329,8 +329,10 @@ process.on('SIGTERM', () => {
   });
 });
 
-// Start the server
-startServer();
+// Only start the server if we're not in a test environment
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;
-export { io }; // Export Socket.IO instance for use in other modules
+export { io, startServer }; // Export for use in other modules
