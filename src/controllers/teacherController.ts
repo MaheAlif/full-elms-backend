@@ -803,7 +803,7 @@ export class TeacherController {
         JOIN assignments a ON s.assignment_id = a.id
         JOIN sections sec ON a.section_id = sec.id
         JOIN courses c ON sec.course_id = c.id
-        WHERE s.id = ? AND (c.teacher_id = ? OR s.teacher_id = ?)
+        WHERE s.id = ? AND (c.teacher_id = ? OR sec.teacher_id = ?)
       `, [submissionId, teacherId, teacherId]);
 
       if ((ownershipCheck as RowDataPacket[]).length === 0) {

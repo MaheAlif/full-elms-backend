@@ -148,13 +148,13 @@ export class AIController {
       // Format into conversation format
       const conversation = (interactions as any[]).reverse().flatMap(interaction => [
         {
-          id: ${interaction.id}-user,
+          id: `${interaction.id}-user`,
           role: 'user',
           message: interaction.query,
           timestamp: interaction.created_at,
         },
         {
-          id: ${interaction.id}-ai,
+          id: `${interaction.id}-ai`,
           role: 'assistant',
           message: interaction.response,
           timestamp: interaction.created_at,
@@ -222,7 +222,7 @@ export class AIController {
         'INSERT INTO ai_interactions (user_id, query, response) VALUES (?, ?, ?)',
         [
           userId,
-          [MATERIAL ADDED] ${material.title} (${material.type}) from ${material.course_name},
+          `[MATERIAL ADDED] ${material.title} (${material.type}) from ${material.course_name}`,
           aiContext
         ]
       );
