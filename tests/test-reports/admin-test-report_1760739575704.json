@@ -1,0 +1,42 @@
+{
+  "testSuite": "Admin Feature Automation",
+  "timestamp": "2025-10-17T22:19:35.704Z",
+  "adminUser": "admin.aminul@uiu.ac.bd",
+  "testData": {
+    "course": {
+      "name": "Test Course 1760739570238",
+      "code": "TC1760739570238",
+      "description": "Automated test course created by Selenium",
+      "credits": 3,
+      "semester": "Fall",
+      "academicYear": "2025-2026"
+    },
+    "teacher": {
+      "name": "Test Teacher 1760739570238",
+      "email": "teacher1760739570238@test.uiu.ac.bd",
+      "password": "testpass123"
+    },
+    "student": {
+      "name": "Test Student 1760739570238",
+      "email": "student1760739570238@test.uiu.ac.bd",
+      "password": "testpass123"
+    }
+  },
+  "createdIds": {
+    "courseId": null,
+    "teacherId": null,
+    "studentId": null,
+    "sectionId": null
+  },
+  "totalTests": 1,
+  "passed": 0,
+  "failed": 1,
+  "results": [
+    {
+      "test": "Admin Login",
+      "passed": false,
+      "message": "unknown error: net::ERR_CONNECTION_REFUSED\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-17T22:19:35.686Z"
+    }
+  ]
+}

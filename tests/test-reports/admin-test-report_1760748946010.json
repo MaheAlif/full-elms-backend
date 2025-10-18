@@ -1,0 +1,88 @@
+{
+  "testSuite": "Admin Feature Automation",
+  "timestamp": "2025-10-18T00:55:46.010Z",
+  "adminUser": "admin.aminul@uiu.ac.bd",
+  "testData": {
+    "course": {
+      "name": "Test Course 1760748732843",
+      "code": "TC1760748732843",
+      "description": "Automated test course created by Selenium",
+      "credits": 3,
+      "semester": "Fall",
+      "academicYear": "2025-2026"
+    },
+    "teacher": {
+      "name": "Test Teacher 1760748732843",
+      "email": "teacher1760748732843@test.uiu.ac.bd",
+      "password": "testpass123"
+    },
+    "student": {
+      "name": "Test Student 1760748732843",
+      "email": "student1760748732843@test.uiu.ac.bd",
+      "password": "testpass123"
+    },
+    "section": {
+      "name": "Section A - 1760748871586",
+      "capacity": "50"
+    }
+  },
+  "createdIds": {
+    "courseId": null,
+    "teacherId": null,
+    "studentId": null,
+    "sectionId": null
+  },
+  "totalTests": 8,
+  "passed": 5,
+  "failed": 3,
+  "results": [
+    {
+      "test": "Admin Login",
+      "passed": true,
+      "message": "Successfully logged in as Administrator",
+      "timestamp": "2025-10-18T00:52:43.395Z"
+    },
+    {
+      "test": "View Admin Dashboard",
+      "passed": true,
+      "message": "Admin dashboard is accessible",
+      "timestamp": "2025-10-18T00:52:47.427Z"
+    },
+    {
+      "test": "Create New Teacher",
+      "passed": true,
+      "message": "Teacher \"Test Teacher 1760748732843\" created and saved to database",
+      "timestamp": "2025-10-18T00:53:17.110Z"
+    },
+    {
+      "test": "Create New Course",
+      "passed": true,
+      "message": "Course \"Test Course 1760748732843\" created and saved to database",
+      "timestamp": "2025-10-18T00:54:16.691Z"
+    },
+    {
+      "test": "Create Section for Course",
+      "passed": true,
+      "message": "Section \"Section A - 1760748871586\" created for course TC1760748732843",
+      "timestamp": "2025-10-18T00:55:03.768Z"
+    },
+    {
+      "test": "Create New Student",
+      "passed": false,
+      "message": "ECONNREFUSED connect ECONNREFUSED 127.0.0.1:64297",
+      "timestamp": "2025-10-18T00:55:43.257Z"
+    },
+    {
+      "test": "View All Students",
+      "passed": false,
+      "message": "ECONNREFUSED connect ECONNREFUSED 127.0.0.1:64297",
+      "timestamp": "2025-10-18T00:55:44.685Z"
+    },
+    {
+      "test": "Admin Logout",
+      "passed": false,
+      "message": "Element not found: By(css selector, button[class*=\"rounded-full\"])",
+      "timestamp": "2025-10-18T00:55:45.952Z"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "testSuite": "Student Feature Automation",
+  "timestamp": "2025-10-17T21:44:07.462Z",
+  "totalTests": 8,
+  "passed": 3,
+  "failed": 5,
+  "results": [
+    {
+      "test": "Student Login",
+      "passed": true,
+      "message": "Successfully logged in and redirected to dashboard",
+      "timestamp": "2025-10-17T21:42:05.444Z"
+    },
+    {
+      "test": "View Enrolled Courses",
+      "passed": false,
+      "message": "Found 0 courses",
+      "timestamp": "2025-10-17T21:42:19.472Z"
+    },
+    {
+      "test": "View Course Materials",
+      "passed": false,
+      "message": "Element not found: By(css selector, [data-testid^=\"course-card-\"])",
+      "timestamp": "2025-10-17T21:42:29.971Z"
+    },
+    {
+      "test": "View Assignments",
+      "passed": true,
+      "message": "Found 0 assignments",
+      "timestamp": "2025-10-17T21:43:02.067Z"
+    },
+    {
+      "test": "Class Chat",
+      "passed": false,
+      "message": "Element not found: By(css selector, [data-testid=\"chat-input\"])",
+      "timestamp": "2025-10-17T21:43:34.569Z"
+    },
+    {
+      "test": "Calendar View",
+      "passed": true,
+      "message": "Calendar accessed",
+      "timestamp": "2025-10-17T21:43:56.664Z"
+    },
+    {
+      "test": "AI Chatbot",
+      "passed": false,
+      "message": "ECONNREFUSED connect ECONNREFUSED 127.0.0.1:59419",
+      "timestamp": "2025-10-17T21:44:07.217Z"
+    },
+    {
+      "test": "Student Logout",
+      "passed": false,
+      "message": "Element not found: By(css selector, button[class*=\"rounded-full\"])",
+      "timestamp": "2025-10-17T21:44:07.439Z"
+    }
+  ]
+}

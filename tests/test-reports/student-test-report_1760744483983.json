@@ -1,0 +1,57 @@
+{
+  "testSuite": "Student Feature Automation",
+  "timestamp": "2025-10-17T23:41:23.983Z",
+  "totalTests": 8,
+  "passed": 7,
+  "failed": 1,
+  "results": [
+    {
+      "test": "Student Login",
+      "passed": true,
+      "message": "Successfully logged in and redirected to dashboard",
+      "timestamp": "2025-10-17T23:40:54.916Z"
+    },
+    {
+      "test": "View Enrolled Courses",
+      "passed": true,
+      "message": "Found 4 courses",
+      "timestamp": "2025-10-17T23:40:58.966Z"
+    },
+    {
+      "test": "View Course Materials",
+      "passed": true,
+      "message": "Found 4 materials",
+      "timestamp": "2025-10-17T23:41:02.609Z"
+    },
+    {
+      "test": "View Assignments",
+      "passed": true,
+      "message": "Found 1 assignments",
+      "timestamp": "2025-10-17T23:41:04.685Z"
+    },
+    {
+      "test": "Class Chat",
+      "passed": false,
+      "message": "Element not found: By(css selector, [data-testid=\"chat-input\"])",
+      "timestamp": "2025-10-17T23:41:17.296Z"
+    },
+    {
+      "test": "Calendar View",
+      "passed": true,
+      "message": "Calendar is visible with proper grid",
+      "timestamp": "2025-10-17T23:41:19.373Z"
+    },
+    {
+      "test": "AI Chatbot",
+      "passed": true,
+      "message": "AI Assistant interface is accessible",
+      "timestamp": "2025-10-17T23:41:21.448Z"
+    },
+    {
+      "test": "Student Logout",
+      "passed": true,
+      "message": "Successfully logged out and redirected to login page",
+      "timestamp": "2025-10-17T23:41:23.930Z"
+    }
+  ]
+}
