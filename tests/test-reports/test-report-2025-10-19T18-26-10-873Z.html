@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selenium Test Report - Admin Complete Workflow Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .summary-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .summary-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .summary-card.success .value {
+            color: #28a745;
+        }
+        .summary-card.failed .value {
+            color: #dc3545;
+        }
+        .summary-card.duration .value {
+            color: #17a2b8;
+        }
+        .test-details {
+            padding: 30px;
+        }
+        .test-details h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .test-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .test-info-item {
+            display: flex;
+            align-items: center;
+        }
+        .test-info-item strong {
+            min-width: 120px;
+            color: #666;
+        }
+        .step-container {
+            margin-bottom: 20px;
+        }
+        .step {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .step:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .step.success {
+            border-left: 5px solid #28a745;
+        }
+        .step.failed {
+            border-left: 5px solid #dc3545;
+        }
+        .step.pending {
+            border-left: 5px solid #ffc107;
+        }
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .step-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        .step-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .step-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .step-status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .step-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .step-description {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .step-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .step-timestamp {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+        .screenshot-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+        .screenshot-link:hover {
+            background: #5568d3;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e9ecef;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .step:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Admin Complete Workflow Test</h1>
+            <p>Automated Selenium Test Execution Report</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Generated: 10/20/2025, 12:25:14 AM</p>
+        </div>
+
+        <div class="summary">
+            <div class="summary-card">
+                <h3>Total Steps</h3>
+                <div class="value">12</div>
+            </div>
+            <div class="summary-card success">
+                <h3>Passed</h3>
+                <div class="value">5</div>
+            </div>
+            <div class="summary-card failed">
+                <h3>Failed</h3>
+                <div class="value">7</div>
+            </div>
+            <div class="summary-card duration">
+                <h3>Duration</h3>
+                <div class="value">56.76s</div>
+            </div>
+        </div>
+
+        <div class="test-details">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 41.7%">
+                    41.7% Passed
+                </div>
+            </div>
+
+            <div class="test-info">
+                <h2>Test Configuration</h2>
+                <div class="test-info-grid">
+                    <div class="test-info-item">
+                        <strong>Test User:</strong>
+                        <span>admin.aminul@uiu.ac.bd</span>
+                    </div>
+                    <div class="test-info-item">
+                        <strong>Frontend URL:</strong>
+                        <span>http://localhost:3000</span>
+                    </div>
+                    <div class="test-info-item">
+                        <strong>Backend URL:</strong>
+                        <span>http://localhost:5000</span>
+                    </div>
+                    <div class="test-info-item">
+                        <strong>Browser:</strong>
+                        <span>Chrome (Latest)</span>
+                    </div>
+                    <div class="test-info-item">
+                        <strong>Start Time:</strong>
+                        <span>10/20/2025, 12:25:14 AM</span>
+                    </div>
+                    <div class="test-info-item">
+                        <strong>End Time:</strong>
+                        <span>10/20/2025, 12:26:10 AM</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Test Steps Execution</h2>
+            <div class="step-container">
+                
+                <div class="step success">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status success">success</div>
+                    </div>
+                    <div class="step-description">Navigate to login page</div>
+                    <div class="step-details"><strong>Details:</strong> Login page loaded</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:25:14 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:25:17 AM</div>
+                </div>
+                
+                <div class="step success">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status success">success</div>
+                    </div>
+                    <div class="step-description">Select Administrator role</div>
+                    <div class="step-details"><strong>Details:</strong> Administrator role selected</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:25:17 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:25:30 AM</div>
+                </div>
+                
+                <div class="step success">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status success">success</div>
+                    </div>
+                    <div class="step-description">Fill in admin login credentials</div>
+                    <div class="step-details"><strong>Details:</strong> Credentials filled</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:25:30 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:25:40 AM</div>
+                </div>
+                
+                <div class="step success">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status success">success</div>
+                    </div>
+                    <div class="step-description">Submit login form</div>
+                    <div class="step-details"><strong>Details:</strong> Login successful, admin dashboard loaded</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:25:40 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:25:47 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Navigate to Courses tab and create a new course</div>
+                    <div class="step-details"><strong>Details:</strong> Error: Description field not found - this is a required field</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:25:47 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:25:54 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Navigate to Sections tab and create a section</div>
+                    <div class="step-details"><strong>Details:</strong> Error: invalid element state: Element is not currently interactable and may not be manipulated
+  (Session info: chrome=141.0.7390.108)</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:25:54 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:02 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Navigate to Teachers tab and create a teacher</div>
+                    <div class="step-details"><strong>Details:</strong> Error: element click intercepted: Element <button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_5_-content-teachers" data-state="inactive" id="radix-_r_5_-trigger-teachers" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-green" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">...</button> is not clickable at point (671, 125). Other element would receive the click: <div data-state="open" class="fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" data-aria-hidden="true" aria-hidden="true" style="pointer-events: auto;"></div>
+  (Session info: chrome=141.0.7390.108)</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:26:02 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:04 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Assign teacher to the course section</div>
+                    <div class="step-details"><strong>Details:</strong> Error: element click intercepted: Element <button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_5_-content-sections" data-state="active" id="radix-_r_5_-trigger-sections" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-orange" tabindex="0" data-orientation="horizontal" data-radix-collection-item="">...</button> is not clickable at point (385, 125). Other element would receive the click: <div data-state="open" class="fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" data-aria-hidden="true" aria-hidden="true" style="pointer-events: auto;"></div>
+  (Session info: chrome=141.0.7390.108)</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:26:04 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:05 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Navigate to Students tab and create a student</div>
+                    <div class="step-details"><strong>Details:</strong> Error: element click intercepted: Element <button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_5_-content-students" data-state="inactive" id="radix-_r_5_-trigger-students" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-yellow" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">...</button> is not clickable at point (814, 125). Other element would receive the click: <div data-state="open" class="fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" data-aria-hidden="true" aria-hidden="true" style="pointer-events: auto;"></div>
+  (Session info: chrome=141.0.7390.108)</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:26:05 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:06 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Assign student to the section</div>
+                    <div class="step-details"><strong>Details:</strong> Error: element click intercepted: Element <button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_5_-content-sections" data-state="active" id="radix-_r_5_-trigger-sections" data-slot="tabs-trigger" class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-orange" tabindex="0" data-orientation="horizontal" data-radix-collection-item="">...</button> is not clickable at point (385, 125). Other element would receive the click: <div data-state="open" class="fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" data-aria-hidden="true" aria-hidden="true" style="pointer-events: auto;"></div>
+  (Session info: chrome=141.0.7390.108)</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:26:06 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:07 AM</div>
+                </div>
+                
+                <div class="step failed">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status failed">failed</div>
+                    </div>
+                    <div class="step-description">Logout from admin account</div>
+                    <div class="step-details"><strong>Details:</strong> Error: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(., "Logout") or contains(., "Log out") or contains(., "Sign out")] | //a[contains(., "Logout") or contains(., "Log out")]"}
+  (Session info: chrome=141.0.7390.108)</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:26:07 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:08 AM</div>
+                </div>
+                
+                <div class="step success">
+                    <div class="step-header">
+                        <div class="step-number">Step undefined</div>
+                        <div class="step-status success">success</div>
+                    </div>
+                    <div class="step-description">Take final screenshot and verify all steps</div>
+                    <div class="step-details"><strong>Details:</strong> All steps completed</div>
+                    <div class="step-timestamp">Executed at: 10/20/2025, 12:26:08 AM</div>
+                    <div class="step-timestamp">Completed at: 10/20/2025, 12:26:10 AM</div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>ELMS - E-Learning Management System</strong></p>
+            <p>Automated Testing Framework | Selenium WebDriver</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Report generated on 10/20/2025, 12:26:10 AM</p>
+        </div>
+    </div>
+</body>
+</html>

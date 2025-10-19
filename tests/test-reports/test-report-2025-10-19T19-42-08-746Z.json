@@ -1,0 +1,121 @@
+{
+  "testName": "Admin Complete Workflow Test",
+  "startTime": "2025-10-19T19:40:06.279Z",
+  "endTime": "2025-10-19T19:42:08.744Z",
+  "duration": 122.465,
+  "success": false,
+  "error": null,
+  "configuration": {
+    "testUser": "admin.aminul@uiu.ac.bd",
+    "frontendUrl": "http://localhost:3000",
+    "backendUrl": "http://localhost:5000",
+    "browser": "Chrome",
+    "timeout": 5000
+  },
+  "summary": {
+    "totalSteps": 12,
+    "passedSteps": 11,
+    "failedSteps": 1,
+    "pendingSteps": 0,
+    "successRate": "91.67%"
+  },
+  "steps": [
+    {
+      "description": "Navigate to login page",
+      "status": "success",
+      "details": "Login page loaded",
+      "timestamp": "2025-10-19T19:40:06.903Z",
+      "completedAt": "2025-10-19T19:40:09.860Z",
+      "duration": "2.96s"
+    },
+    {
+      "description": "Select Administrator role",
+      "status": "success",
+      "details": "Administrator role selected",
+      "timestamp": "2025-10-19T19:40:09.861Z",
+      "completedAt": "2025-10-19T19:40:22.676Z",
+      "duration": "12.81s"
+    },
+    {
+      "description": "Fill in admin login credentials",
+      "status": "success",
+      "details": "Credentials filled",
+      "timestamp": "2025-10-19T19:40:22.676Z",
+      "completedAt": "2025-10-19T19:40:32.587Z",
+      "duration": "9.91s"
+    },
+    {
+      "description": "Submit login form",
+      "status": "success",
+      "details": "Login successful, admin dashboard loaded",
+      "timestamp": "2025-10-19T19:40:32.587Z",
+      "completedAt": "2025-10-19T19:40:39.512Z",
+      "duration": "6.92s"
+    },
+    {
+      "description": "Navigate to Courses tab and create a new course",
+      "status": "success",
+      "details": "Course created: Test Course 1760902806279",
+      "timestamp": "2025-10-19T19:40:39.512Z",
+      "completedAt": "2025-10-19T19:40:56.756Z",
+      "duration": "17.24s"
+    },
+    {
+      "description": "Navigate to Sections tab and create a section",
+      "status": "success",
+      "details": "Section created: Section A-1760902806279",
+      "timestamp": "2025-10-19T19:40:56.756Z",
+      "completedAt": "2025-10-19T19:41:23.202Z",
+      "duration": "26.45s"
+    },
+    {
+      "description": "Navigate to Teachers tab and create a teacher",
+      "status": "success",
+      "details": "Teacher created: Test Teacher 1760902806279",
+      "timestamp": "2025-10-19T19:41:23.202Z",
+      "completedAt": "2025-10-19T19:41:31.701Z",
+      "duration": "8.50s"
+    },
+    {
+      "description": "Navigate to Students tab and create a student",
+      "status": "success",
+      "details": "Student created: Test Student 1760902806279",
+      "timestamp": "2025-10-19T19:41:31.702Z",
+      "completedAt": "2025-10-19T19:41:40.181Z",
+      "duration": "8.48s"
+    },
+    {
+      "description": "Go back to Teachers tab and assign teacher to section",
+      "status": "success",
+      "details": "Teacher assigned to section",
+      "timestamp": "2025-10-19T19:41:40.181Z",
+      "completedAt": "2025-10-19T19:41:52.951Z",
+      "duration": "12.77s"
+    },
+    {
+      "description": "Go to Students tab and assign student to section",
+      "status": "success",
+      "details": "Student assigned to section",
+      "timestamp": "2025-10-19T19:41:52.951Z",
+      "completedAt": "2025-10-19T19:42:05.495Z",
+      "duration": "12.54s"
+    },
+    {
+      "description": "Logout from admin account",
+      "status": "failed",
+      "details": "Error: no such element: Unable to locate element: {\"method\":\"xpath\",\"selector\":\"//button[contains(., \"Logout\") or contains(., \"Log out\") or contains(., \"Sign out\")] | //a[contains(., \"Logout\") or contains(., \"Log out\")]\"}\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T19:42:05.495Z",
+      "completedAt": "2025-10-19T19:42:06.627Z",
+      "duration": "1.13s"
+    },
+    {
+      "description": "Take final screenshot and verify all steps",
+      "status": "success",
+      "details": "All steps completed",
+      "timestamp": "2025-10-19T19:42:06.628Z",
+      "completedAt": "2025-10-19T19:42:08.744Z",
+      "duration": "2.12s"
+    }
+  ],
+  "generatedAt": "2025-10-19T19:42:08.761Z"
+}

@@ -1,0 +1,16 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 1:12:53 AM,10/20/2025, 1:12:56 AM,2.96
+,"Select Administrator role",success,"Administrator role selected",10/20/2025, 1:12:56 AM,10/20/2025, 1:13:09 AM,12.66
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 1:13:09 AM,10/20/2025, 1:13:19 AM,9.91
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 1:13:19 AM,10/20/2025, 1:13:25 AM,6.83
+,"Navigate to Courses tab and create a new course",success,"Course created: Test Course 1760901172923",10/20/2025, 1:13:25 AM,10/20/2025, 1:13:43 AM,17.32
+,"Navigate to Sections tab and create a section",failed,"Error: Section not found in list after creation - likely not saved to database",10/20/2025, 1:13:43 AM,10/20/2025, 1:14:07 AM,24.18
+,"Navigate to Teachers tab and create a teacher",success,"Teacher created: Test Teacher 1760901172923",10/20/2025, 1:14:07 AM,10/20/2025, 1:14:15 AM,8.56
+,"Assign teacher to the course section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//select[@name="teacherId" or @name="teacher"] | //div[contains(@class, "select")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:14:15 AM,10/20/2025, 1:14:20 AM,4.26
+,"Navigate to Students tab and create a student",success,"Student created: Test Student 1760901172923",10/20/2025, 1:14:20 AM,10/20/2025, 1:14:28 AM,8.29
+,"Assign student to the section",failed,"Error: element click intercepted: Element <button data-slot="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full glassmorphic hover:glow-yellow" type="submit" disabled="">...</button> is not clickable at point (457, 571). Other element would receive the click: <div class="md:col-span-2">...</div>
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:14:28 AM,10/20/2025, 1:14:33 AM,5.30
+,"Logout from admin account",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(., "Logout") or contains(., "Log out") or contains(., "Sign out")] | //a[contains(., "Logout") or contains(., "Log out")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:14:33 AM,10/20/2025, 1:14:34 AM,1.13
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 1:14:34 AM,10/20/2025, 1:14:37 AM,2.11

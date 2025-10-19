@@ -1,0 +1,17 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 12:01:39 AM,10/20/2025, 12:01:45 AM,5.79
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 12:01:45 AM,10/20/2025, 12:01:55 AM,9.98
+,"Select admin role",success,"Role selected/confirmed",10/20/2025, 12:01:55 AM,10/20/2025, 12:01:55 AM,0.88
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 12:01:55 AM,10/20/2025, 12:02:03 AM,7.19
+,"Navigate to Courses tab and create a new course",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), "Courses") or contains(text(), "courses")] | //button[contains(text(), "Courses")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:02:03 AM,10/20/2025, 12:02:03 AM,0.88
+,"Navigate to Sections tab and create a section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), "Sections") or contains(text(), "sections")] | //button[contains(text(), "Sections")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:02:03 AM,10/20/2025, 12:02:04 AM,0.90
+,"Navigate to Teachers tab and create a teacher",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), "Teachers") or contains(text(), "teachers")] | //button[contains(text(), "Teachers")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:02:04 AM,10/20/2025, 12:02:05 AM,0.91
+,"Assign teacher to the course section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), "Sections") or contains(text(), "sections")] | //button[contains(text(), "Sections")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:02:05 AM,10/20/2025, 12:02:06 AM,0.59
+,"Navigate to Students tab and create a student",failed,"Error: ECONNREFUSED connect ECONNREFUSED 127.0.0.1:50104",10/20/2025, 12:02:06 AM,10/20/2025, 12:02:06 AM,0.15
+,"Assign student to the section",failed,"Error: ECONNREFUSED connect ECONNREFUSED 127.0.0.1:50104",10/20/2025, 12:02:06 AM,10/20/2025, 12:02:06 AM,0.14
+,"Logout from admin account",failed,"Error: ECONNREFUSED connect ECONNREFUSED 127.0.0.1:50104",10/20/2025, 12:02:06 AM,10/20/2025, 12:02:07 AM,1.22
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 12:02:07 AM,10/20/2025, 12:02:09 AM,2.09

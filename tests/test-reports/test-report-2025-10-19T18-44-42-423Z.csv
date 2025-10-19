@@ -1,0 +1,16 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 12:43:07 AM,10/20/2025, 12:43:10 AM,2.89
+,"Select Administrator role",success,"Administrator role selected",10/20/2025, 12:43:10 AM,10/20/2025, 12:43:23 AM,12.64
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 12:43:23 AM,10/20/2025, 12:43:33 AM,9.63
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 12:43:33 AM,10/20/2025, 12:43:39 AM,6.78
+,"Navigate to Courses tab and create a new course",success,"Course created: Test Course 1760899387342",10/20/2025, 12:43:39 AM,10/20/2025, 12:43:57 AM,17.28
+,"Navigate to Sections tab and create a section",success,"Section created: Section A-1760899387342",10/20/2025, 12:43:57 AM,10/20/2025, 12:44:17 AM,20.70
+,"Navigate to Teachers tab and create a teacher",success,"Teacher created: Test Teacher 1760899387342",10/20/2025, 12:44:17 AM,10/20/2025, 12:44:26 AM,8.54
+,"Assign teacher to the course section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//tr[contains(., "Section A-1760899387342")] | //div[contains(., "Section A-1760899387342")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:44:26 AM,10/20/2025, 12:44:28 AM,2.17
+,"Navigate to Students tab and create a student",success,"Student created: Test Student 1760899387342",10/20/2025, 12:44:28 AM,10/20/2025, 12:44:36 AM,8.41
+,"Assign student to the section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//tr[contains(., "Section A-1760899387342")] | //div[contains(., "Section A-1760899387342")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:44:36 AM,10/20/2025, 12:44:39 AM,2.17
+,"Logout from admin account",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(., "Logout") or contains(., "Log out") or contains(., "Sign out")] | //a[contains(., "Logout") or contains(., "Log out")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:44:39 AM,10/20/2025, 12:44:40 AM,1.14
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 12:44:40 AM,10/20/2025, 12:44:42 AM,2.12

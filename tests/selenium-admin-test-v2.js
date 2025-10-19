@@ -3,7 +3,7 @@
  * OPTIMIZED VERSION - Faster, more reliable form filling
  */
 
-const { Builder, By, until, Key } = require('selenium-webdriver');
+const { Builder, By, Key, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const path = require('path');
 
@@ -120,20 +120,8 @@ class AdminTest {
     console.log('\n📚 TEST 2: CREATE COURSE');
     console.log('─'.repeat(40));
     try {
-      // Navigate to courses - try multiple methods
-      let coursesClicked = await this.clickButton('courses-tab');
-      
-      if (!coursesClicked) {
-        // Try keyboard navigation
-        try {
-          const coursesTab = await this.driver.findElement(By.css('[data-testid="courses-tab"]'));
-          await coursesTab.sendKeys(Key.ENTER);
-          console.log('   ✓ Used keyboard to navigate to Courses');
-        } catch (e) {
-          console.log('   ✗ Could not navigate to courses');
-        }
-      }
-      
+      // Navigate to courses
+      await this.clickButton('courses-tab');
       await this.driver.sleep(2000);
 
       // Scroll to form
@@ -170,19 +158,8 @@ class AdminTest {
     console.log('\n👥 TEST 3: CREATE STUDENT');
     console.log('─'.repeat(40));
     try {
-      // Navigate to students - try multiple methods
-      let studentsClicked = await this.clickButton('students-tab');
-      
-      if (!studentsClicked) {
-        try {
-          const studentsTab = await this.driver.findElement(By.css('[data-testid="students-tab"]'));
-          await studentsTab.sendKeys(Key.ENTER);
-          console.log('   ✓ Used keyboard to navigate to Students');
-        } catch (e) {
-          console.log('   ✗ Could not navigate to students');
-        }
-      }
-      
+      // Navigate to students
+      await this.clickButton('students-tab');
       await this.driver.sleep(2000);
 
       // Scroll to form

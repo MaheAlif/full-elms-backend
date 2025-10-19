@@ -1,0 +1,121 @@
+{
+  "testName": "Admin Complete Workflow Test",
+  "startTime": "2025-10-19T18:36:44.949Z",
+  "endTime": "2025-10-19T18:37:53.745Z",
+  "duration": 68.796,
+  "success": false,
+  "error": null,
+  "configuration": {
+    "testUser": "admin.aminul@uiu.ac.bd",
+    "frontendUrl": "http://localhost:3000",
+    "backendUrl": "http://localhost:5000",
+    "browser": "Chrome",
+    "timeout": 5000
+  },
+  "summary": {
+    "totalSteps": 12,
+    "passedSteps": 6,
+    "failedSteps": 6,
+    "pendingSteps": 0,
+    "successRate": "50.00%"
+  },
+  "steps": [
+    {
+      "description": "Navigate to login page",
+      "status": "success",
+      "details": "Login page loaded",
+      "timestamp": "2025-10-19T18:36:45.521Z",
+      "completedAt": "2025-10-19T18:36:48.654Z",
+      "duration": "3.13s"
+    },
+    {
+      "description": "Select Administrator role",
+      "status": "success",
+      "details": "Administrator role selected",
+      "timestamp": "2025-10-19T18:36:48.655Z",
+      "completedAt": "2025-10-19T18:37:01.371Z",
+      "duration": "12.72s"
+    },
+    {
+      "description": "Fill in admin login credentials",
+      "status": "success",
+      "details": "Credentials filled",
+      "timestamp": "2025-10-19T18:37:01.371Z",
+      "completedAt": "2025-10-19T18:37:11.168Z",
+      "duration": "9.80s"
+    },
+    {
+      "description": "Submit login form",
+      "status": "success",
+      "details": "Login successful, admin dashboard loaded",
+      "timestamp": "2025-10-19T18:37:11.168Z",
+      "completedAt": "2025-10-19T18:37:18.014Z",
+      "duration": "6.85s"
+    },
+    {
+      "description": "Navigate to Courses tab and create a new course",
+      "status": "success",
+      "details": "Course created: Test Course 1760899004949",
+      "timestamp": "2025-10-19T18:37:18.014Z",
+      "completedAt": "2025-10-19T18:37:34.346Z",
+      "duration": "16.33s"
+    },
+    {
+      "description": "Navigate to Sections tab and create a section",
+      "status": "failed",
+      "details": "Error: element click intercepted: Element <button data-slot=\"button\" class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full glassmorphic hover:glow-cyan\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"true\" aria-controls=\"radix-_r_1f_\" data-state=\"open\">...</button> is not clickable at point (457, 287). Other element would receive the click: <p id=\"radix-_r_1h_\" class=\"text-sm text-muted-foreground\">...</p>\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T18:37:34.346Z",
+      "completedAt": "2025-10-19T18:37:45.800Z",
+      "duration": "11.45s"
+    },
+    {
+      "description": "Navigate to Teachers tab and create a teacher",
+      "status": "failed",
+      "details": "Error: element click intercepted: Element <button type=\"button\" role=\"tab\" aria-selected=\"false\" aria-controls=\"radix-_r_s_-content-teachers\" data-state=\"inactive\" id=\"radix-_r_s_-trigger-teachers\" data-slot=\"tabs-trigger\" class=\"data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-green\" tabindex=\"-1\" data-orientation=\"horizontal\" data-radix-collection-item=\"\">...</button> is not clickable at point (671, 125). Other element would receive the click: <div data-state=\"open\" class=\"fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0\" data-aria-hidden=\"true\" aria-hidden=\"true\" style=\"pointer-events: auto;\"></div>\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T18:37:45.800Z",
+      "completedAt": "2025-10-19T18:37:46.994Z",
+      "duration": "1.19s"
+    },
+    {
+      "description": "Assign teacher to the course section",
+      "status": "failed",
+      "details": "Error: element click intercepted: Element <button type=\"button\" role=\"tab\" aria-selected=\"true\" aria-controls=\"radix-_r_s_-content-sections\" data-state=\"active\" id=\"radix-_r_s_-trigger-sections\" data-slot=\"tabs-trigger\" class=\"data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-orange\" tabindex=\"0\" data-orientation=\"horizontal\" data-radix-collection-item=\"\">...</button> is not clickable at point (385, 125). Other element would receive the click: <div data-state=\"open\" class=\"fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0\" data-aria-hidden=\"true\" aria-hidden=\"true\" style=\"pointer-events: auto;\"></div>\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T18:37:46.994Z",
+      "completedAt": "2025-10-19T18:37:48.175Z",
+      "duration": "1.18s"
+    },
+    {
+      "description": "Navigate to Students tab and create a student",
+      "status": "failed",
+      "details": "Error: element click intercepted: Element <button type=\"button\" role=\"tab\" aria-selected=\"false\" aria-controls=\"radix-_r_s_-content-students\" data-state=\"inactive\" id=\"radix-_r_s_-trigger-students\" data-slot=\"tabs-trigger\" class=\"data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-yellow\" tabindex=\"-1\" data-orientation=\"horizontal\" data-radix-collection-item=\"\">...</button> is not clickable at point (814, 125). Other element would receive the click: <div data-state=\"open\" class=\"fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0\" data-aria-hidden=\"true\" aria-hidden=\"true\" style=\"pointer-events: auto;\"></div>\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T18:37:48.176Z",
+      "completedAt": "2025-10-19T18:37:49.348Z",
+      "duration": "1.17s"
+    },
+    {
+      "description": "Assign student to the section",
+      "status": "failed",
+      "details": "Error: element click intercepted: Element <button type=\"button\" role=\"tab\" aria-selected=\"true\" aria-controls=\"radix-_r_s_-content-sections\" data-state=\"active\" id=\"radix-_r_s_-trigger-sections\" data-slot=\"tabs-trigger\" class=\"data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 glassmorphic hover:glow-orange\" tabindex=\"0\" data-orientation=\"horizontal\" data-radix-collection-item=\"\">...</button> is not clickable at point (385, 125). Other element would receive the click: <div data-state=\"open\" class=\"fixed inset-0 z-50 bg-black/80 dark:bg-black/90 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0\" data-aria-hidden=\"true\" aria-hidden=\"true\" style=\"pointer-events: auto;\"></div>\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T18:37:49.349Z",
+      "completedAt": "2025-10-19T18:37:50.482Z",
+      "duration": "1.13s"
+    },
+    {
+      "description": "Logout from admin account",
+      "status": "failed",
+      "details": "Error: no such element: Unable to locate element: {\"method\":\"xpath\",\"selector\":\"//button[contains(., \"Logout\") or contains(., \"Log out\") or contains(., \"Sign out\")] | //a[contains(., \"Logout\") or contains(., \"Log out\")]\"}\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T18:37:50.482Z",
+      "completedAt": "2025-10-19T18:37:51.641Z",
+      "duration": "1.16s"
+    },
+    {
+      "description": "Take final screenshot and verify all steps",
+      "status": "success",
+      "details": "All steps completed",
+      "timestamp": "2025-10-19T18:37:51.641Z",
+      "completedAt": "2025-10-19T18:37:53.745Z",
+      "duration": "2.10s"
+    }
+  ],
+  "generatedAt": "2025-10-19T18:37:53.761Z"
+}

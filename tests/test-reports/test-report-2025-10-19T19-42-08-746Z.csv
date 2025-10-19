@@ -1,0 +1,14 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 1:40:06 AM,10/20/2025, 1:40:09 AM,2.96
+,"Select Administrator role",success,"Administrator role selected",10/20/2025, 1:40:09 AM,10/20/2025, 1:40:22 AM,12.81
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 1:40:22 AM,10/20/2025, 1:40:32 AM,9.91
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 1:40:32 AM,10/20/2025, 1:40:39 AM,6.92
+,"Navigate to Courses tab and create a new course",success,"Course created: Test Course 1760902806279",10/20/2025, 1:40:39 AM,10/20/2025, 1:40:56 AM,17.24
+,"Navigate to Sections tab and create a section",success,"Section created: Section A-1760902806279",10/20/2025, 1:40:56 AM,10/20/2025, 1:41:23 AM,26.45
+,"Navigate to Teachers tab and create a teacher",success,"Teacher created: Test Teacher 1760902806279",10/20/2025, 1:41:23 AM,10/20/2025, 1:41:31 AM,8.50
+,"Navigate to Students tab and create a student",success,"Student created: Test Student 1760902806279",10/20/2025, 1:41:31 AM,10/20/2025, 1:41:40 AM,8.48
+,"Go back to Teachers tab and assign teacher to section",success,"Teacher assigned to section",10/20/2025, 1:41:40 AM,10/20/2025, 1:41:52 AM,12.77
+,"Go to Students tab and assign student to section",success,"Student assigned to section",10/20/2025, 1:41:52 AM,10/20/2025, 1:42:05 AM,12.54
+,"Logout from admin account",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(., "Logout") or contains(., "Log out") or contains(., "Sign out")] | //a[contains(., "Logout") or contains(., "Log out")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:42:05 AM,10/20/2025, 1:42:06 AM,1.13
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 1:42:06 AM,10/20/2025, 1:42:08 AM,2.12

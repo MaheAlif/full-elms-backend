@@ -1,0 +1,16 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 1:05:59 AM,10/20/2025, 1:06:02 AM,3.24
+,"Select Administrator role",success,"Administrator role selected",10/20/2025, 1:06:02 AM,10/20/2025, 1:06:15 AM,12.76
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 1:06:15 AM,10/20/2025, 1:06:25 AM,9.92
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 1:06:25 AM,10/20/2025, 1:06:32 AM,6.80
+,"Navigate to Courses tab and create a new course",success,"Course created: Test Course 1760900757699",10/20/2025, 1:06:32 AM,10/20/2025, 1:06:49 AM,17.35
+,"Navigate to Sections tab and create a section",failed,"Error: Section not found in list after creation - likely not saved to database",10/20/2025, 1:06:49 AM,10/20/2025, 1:07:09 AM,20.51
+,"Navigate to Teachers tab and create a teacher",success,"Teacher created: Test Teacher 1760900757699",10/20/2025, 1:07:09 AM,10/20/2025, 1:07:18 AM,8.56
+,"Assign teacher to the course section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//tr[contains(., "Section A-1760900757699")] | //div[contains(., "Section A-1760900757699")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:07:18 AM,10/20/2025, 1:07:20 AM,2.19
+,"Navigate to Students tab and create a student",success,"Student created: Test Student 1760900757699",10/20/2025, 1:07:20 AM,10/20/2025, 1:07:29 AM,8.39
+,"Assign student to the section",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//tr[contains(., "Section A-1760900757699")] | //div[contains(., "Section A-1760900757699")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:07:29 AM,10/20/2025, 1:07:31 AM,2.17
+,"Logout from admin account",failed,"Error: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(., "Logout") or contains(., "Log out") or contains(., "Sign out")] | //a[contains(., "Logout") or contains(., "Log out")]"}
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:07:31 AM,10/20/2025, 1:07:32 AM,1.15
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 1:07:32 AM,10/20/2025, 1:07:34 AM,2.12

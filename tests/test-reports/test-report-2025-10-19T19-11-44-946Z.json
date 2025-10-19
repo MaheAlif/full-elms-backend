@@ -1,0 +1,121 @@
+{
+  "testName": "Admin Complete Workflow Test",
+  "startTime": "2025-10-19T19:10:22.428Z",
+  "endTime": "2025-10-19T19:11:44.941Z",
+  "duration": 82.513,
+  "success": false,
+  "error": null,
+  "configuration": {
+    "testUser": "admin.aminul@uiu.ac.bd",
+    "frontendUrl": "http://localhost:3000",
+    "backendUrl": "http://localhost:5000",
+    "browser": "Chrome",
+    "timeout": 5000
+  },
+  "summary": {
+    "totalSteps": 12,
+    "passedSteps": 6,
+    "failedSteps": 6,
+    "pendingSteps": 0,
+    "successRate": "50.00%"
+  },
+  "steps": [
+    {
+      "description": "Navigate to login page",
+      "status": "success",
+      "details": "Login page loaded",
+      "timestamp": "2025-10-19T19:10:23.013Z",
+      "completedAt": "2025-10-19T19:10:25.953Z",
+      "duration": "2.94s"
+    },
+    {
+      "description": "Select Administrator role",
+      "status": "success",
+      "details": "Administrator role selected",
+      "timestamp": "2025-10-19T19:10:25.953Z",
+      "completedAt": "2025-10-19T19:10:38.863Z",
+      "duration": "12.91s"
+    },
+    {
+      "description": "Fill in admin login credentials",
+      "status": "success",
+      "details": "Credentials filled",
+      "timestamp": "2025-10-19T19:10:38.864Z",
+      "completedAt": "2025-10-19T19:10:48.728Z",
+      "duration": "9.86s"
+    },
+    {
+      "description": "Submit login form",
+      "status": "success",
+      "details": "Login successful, admin dashboard loaded",
+      "timestamp": "2025-10-19T19:10:48.728Z",
+      "completedAt": "2025-10-19T19:10:55.578Z",
+      "duration": "6.85s"
+    },
+    {
+      "description": "Navigate to Courses tab and create a new course",
+      "status": "success",
+      "details": "Course created: Test Course 1760901022428",
+      "timestamp": "2025-10-19T19:10:55.578Z",
+      "completedAt": "2025-10-19T19:11:12.884Z",
+      "duration": "17.31s"
+    },
+    {
+      "description": "Navigate to Sections tab and create a section",
+      "status": "failed",
+      "details": "Error: Section not found in list after creation - likely not saved to database",
+      "timestamp": "2025-10-19T19:11:12.885Z",
+      "completedAt": "2025-10-19T19:11:35.971Z",
+      "duration": "23.09s"
+    },
+    {
+      "description": "Navigate to Teachers tab and create a teacher",
+      "status": "failed",
+      "details": "Error: invalid session id: session deleted as the browser has closed the connection\nfrom disconnected: not connected to DevTools\n  (Session info: chrome=141.0.7390.108)",
+      "timestamp": "2025-10-19T19:11:35.971Z",
+      "completedAt": "2025-10-19T19:11:41.920Z",
+      "duration": "5.95s"
+    },
+    {
+      "description": "Assign teacher to the course section",
+      "status": "failed",
+      "details": "Error: invalid session id",
+      "timestamp": "2025-10-19T19:11:41.920Z",
+      "completedAt": "2025-10-19T19:11:41.921Z",
+      "duration": "0.00s"
+    },
+    {
+      "description": "Navigate to Students tab and create a student",
+      "status": "failed",
+      "details": "Error: invalid session id",
+      "timestamp": "2025-10-19T19:11:41.922Z",
+      "completedAt": "2025-10-19T19:11:41.922Z",
+      "duration": "0.00s"
+    },
+    {
+      "description": "Assign student to the section",
+      "status": "failed",
+      "details": "Error: invalid session id",
+      "timestamp": "2025-10-19T19:11:41.923Z",
+      "completedAt": "2025-10-19T19:11:41.924Z",
+      "duration": "0.00s"
+    },
+    {
+      "description": "Logout from admin account",
+      "status": "failed",
+      "details": "Error: invalid session id",
+      "timestamp": "2025-10-19T19:11:41.924Z",
+      "completedAt": "2025-10-19T19:11:42.932Z",
+      "duration": "1.01s"
+    },
+    {
+      "description": "Take final screenshot and verify all steps",
+      "status": "success",
+      "details": "All steps completed",
+      "timestamp": "2025-10-19T19:11:42.932Z",
+      "completedAt": "2025-10-19T19:11:44.940Z",
+      "duration": "2.01s"
+    }
+  ],
+  "generatedAt": "2025-10-19T19:11:44.962Z"
+}

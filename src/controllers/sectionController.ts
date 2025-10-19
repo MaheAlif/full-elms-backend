@@ -17,6 +17,9 @@ export class SectionController {
     try {
       const { course_id, name, teacher_id, max_capacity } = req.body;
 
+      // Debug logging: print incoming payload
+      console.log('CreateSection payload:', { course_id, name, teacher_id, max_capacity });
+
       const pool = getPool();
 
       // Verify course exists
@@ -66,6 +69,9 @@ export class SectionController {
          VALUES (?, ?, ?, ?, 0)`,
         [course_id, teacher_id || null, name, max_capacity || 50]
       );
+
+      // Debug logging: print DB result
+      console.log('CreateSection DB result:', result);
 
       const sectionId = result.insertId;
 

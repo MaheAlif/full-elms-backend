@@ -1,0 +1,15 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 1:10:23 AM,10/20/2025, 1:10:25 AM,2.94
+,"Select Administrator role",success,"Administrator role selected",10/20/2025, 1:10:25 AM,10/20/2025, 1:10:38 AM,12.91
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 1:10:38 AM,10/20/2025, 1:10:48 AM,9.86
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 1:10:48 AM,10/20/2025, 1:10:55 AM,6.85
+,"Navigate to Courses tab and create a new course",success,"Course created: Test Course 1760901022428",10/20/2025, 1:10:55 AM,10/20/2025, 1:11:12 AM,17.31
+,"Navigate to Sections tab and create a section",failed,"Error: Section not found in list after creation - likely not saved to database",10/20/2025, 1:11:12 AM,10/20/2025, 1:11:35 AM,23.09
+,"Navigate to Teachers tab and create a teacher",failed,"Error: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 1:11:35 AM,10/20/2025, 1:11:41 AM,5.95
+,"Assign teacher to the course section",failed,"Error: invalid session id",10/20/2025, 1:11:41 AM,10/20/2025, 1:11:41 AM,0.00
+,"Navigate to Students tab and create a student",failed,"Error: invalid session id",10/20/2025, 1:11:41 AM,10/20/2025, 1:11:41 AM,0.00
+,"Assign student to the section",failed,"Error: invalid session id",10/20/2025, 1:11:41 AM,10/20/2025, 1:11:41 AM,0.00
+,"Logout from admin account",failed,"Error: invalid session id",10/20/2025, 1:11:41 AM,10/20/2025, 1:11:42 AM,1.01
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 1:11:42 AM,10/20/2025, 1:11:44 AM,2.01

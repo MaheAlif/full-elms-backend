@@ -1,0 +1,25 @@
+Step Number,Description,Status,Details,Start Time,End Time,Duration (s)
+,"Navigate to login page",success,"Login page loaded",10/20/2025, 12:03:39 AM,10/20/2025, 12:03:42 AM,2.97
+,"Fill in admin login credentials",success,"Credentials filled",10/20/2025, 12:03:42 AM,10/20/2025, 12:03:52 AM,9.95
+,"Select admin role",success,"Admin role selected",10/20/2025, 12:03:52 AM,10/20/2025, 12:03:54 AM,1.91
+,"Submit login form",success,"Login successful, admin dashboard loaded",10/20/2025, 12:03:54 AM,10/20/2025, 12:04:01 AM,7.27
+,"Navigate to Courses tab and create a new course",failed,"Error: Cannot read properties of null (reading 'click')",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:01 AM,0.04
+,"Navigate to Sections tab and create a section",failed,"Error: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:01 AM,0.00
+,"Navigate to Teachers tab and create a teacher",failed,"Error: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:01 AM,0.00
+,"Assign teacher to the course section",failed,"Error: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:01 AM,0.00
+,"Navigate to Students tab and create a student",failed,"Error: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:01 AM,0.00
+,"Assign student to the section",failed,"Error: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:01 AM,0.00
+,"Logout from admin account",failed,"Error: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=141.0.7390.108)",10/20/2025, 12:04:01 AM,10/20/2025, 12:04:02 AM,1.00
+,"Take final screenshot and verify all steps",success,"All steps completed",10/20/2025, 12:04:02 AM,10/20/2025, 12:04:04 AM,2.01
